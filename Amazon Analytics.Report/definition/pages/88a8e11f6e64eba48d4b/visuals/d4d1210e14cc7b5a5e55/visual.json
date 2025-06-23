@@ -6,7 +6,7 @@
     "y": 87.439724454649834,
     "z": 0,
     "height": 366.65901262916191,
-    "width": 1163.9035591274398,
+    "width": 1153.6165327210103,
     "tabOrder": 0
   },
   "visual": {
@@ -145,6 +145,31 @@
               "expr": {
                 "Literal": {
                   "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "background": [
+        {
+          "properties": {
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 0,
+                      "Percent": -0.2
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "57D"
                 }
               }
             }

@@ -1,10 +1,10 @@
 table AMZN
-	lineageTag: f60f02ba-c692-4342-8048-02dda8cf5a7f
+	lineageTag: c1ca198a-0529-4e34-b20c-688e876468ac
 
 	column Date
 		dataType: dateTime
 		formatString: Long Date
-		lineageTag: dc071723-fa5a-4287-be03-beebd0b835f2
+		lineageTag: 00e68613-e0f1-448a-b896-cd180797e604
 		summarizeBy: none
 		sourceColumn: Date
 
@@ -14,7 +14,7 @@ table AMZN
 
 	column Open
 		dataType: double
-		lineageTag: e5dcd412-7c16-4ec0-a8fd-75ebd4c7d093
+		lineageTag: 5bf89ec9-913e-43d9-ba8d-b8f94b29c0dc
 		summarizeBy: sum
 		sourceColumn: Open
 
@@ -24,7 +24,7 @@ table AMZN
 
 	column High
 		dataType: double
-		lineageTag: 0eb4774c-2ddf-4bae-bdbe-daf2a3c17b1a
+		lineageTag: af789075-f412-4c61-bf1e-8ff929120924
 		summarizeBy: sum
 		sourceColumn: High
 
@@ -34,7 +34,7 @@ table AMZN
 
 	column Low
 		dataType: double
-		lineageTag: c83eebd7-9a46-48e3-8eec-063f5b71798f
+		lineageTag: 300f2286-4c5e-4ad0-8d68-aee82c588f52
 		summarizeBy: sum
 		sourceColumn: Low
 
@@ -44,7 +44,7 @@ table AMZN
 
 	column Close
 		dataType: double
-		lineageTag: a32aba01-4abb-48f0-a5d3-cf356a61ab48
+		lineageTag: daad9d3d-7470-4f94-879f-d1ce4a7839d6
 		summarizeBy: sum
 		sourceColumn: Close
 
@@ -54,7 +54,7 @@ table AMZN
 
 	column 'Adj Close'
 		dataType: double
-		lineageTag: 929d7b79-b8c8-46e6-8902-4ac4374d62ea
+		lineageTag: 9aa04b47-11d5-4f00-b775-f3c7ad0604fe
 		summarizeBy: sum
 		sourceColumn: Adj Close
 
@@ -65,7 +65,7 @@ table AMZN
 	column Volume
 		dataType: int64
 		formatString: 0
-		lineageTag: f8cdefde-04ac-496f-a3d4-67d3b51f4061
+		lineageTag: 4993d5f5-eb36-4fa6-9f89-42d82fb8f005
 		summarizeBy: sum
 		sourceColumn: Volume
 
@@ -75,11 +75,13 @@ table AMZN
 		mode: import
 		source =
 				let
-				    Source = Csv.Document(File.Contents("C:\Users\Administrator.ADVENTUREWORKS\OneDrive - LM-Competence\PBIP\PBIP\AMZN.csv"),[Delimiter=",", Columns=7, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    Source = Csv.Document(Web.Contents("https://lmcompetence-my.sharepoint.com/personal/lasaros_lmcompetence_onmicrosoft_com/Documents/PBIP/PBIP/AMZN.csv"),[Delimiter=",", Columns=7, Encoding=1252, QuoteStyle=QuoteStyle.None]),
 				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
 				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Date", type date}, {"Open", type number}, {"High", type number}, {"Low", type number}, {"Close", type number}, {"Adj Close", type number}, {"Volume", Int64.Type}})
 				in
 				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
 
 	annotation PBI_ResultType = Table
 
