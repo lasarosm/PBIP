@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/1.4.0/schema.json",
+  "name": "88a8e11f6e64eba48d4b",
+  "displayName": "Amazon Stock Pricing Overview",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280
+}
