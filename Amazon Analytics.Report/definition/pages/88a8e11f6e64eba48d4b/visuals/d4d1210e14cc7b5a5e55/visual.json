@@ -95,7 +95,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "false"
+                  "Value": "true"
                 }
               }
             }
@@ -119,6 +119,80 @@
                 }
               }
             }
+          }
+        }
+      ],
+      "anomalyDetection": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "displayName": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Find anomalies 1'"
+                }
+              }
+            },
+            "transform": {
+              "algorithm": "SampleAndDetectAnomaly",
+              "parameters": [
+                {
+                  "Literal": {
+                    "Value": "0.7D"
+                  },
+                  "Name": "Sensitivity"
+                },
+                {
+                  "Literal": {
+                    "Value": "3500L"
+                  },
+                  "Name": "SampleSizePerSeries"
+                }
+              ]
+            },
+            "explainBy": {
+              "exprs": [],
+              "kind": "ExprList"
+            },
+            "markerColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1DC517'"
+                    }
+                  }
+                }
+              }
+            },
+            "markerTransparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "100D"
+                }
+              }
+            },
+            "confidenceBandColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#e66c37'"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "Sum(AMZN.High)",
+            "id": "1"
           }
         }
       ]
