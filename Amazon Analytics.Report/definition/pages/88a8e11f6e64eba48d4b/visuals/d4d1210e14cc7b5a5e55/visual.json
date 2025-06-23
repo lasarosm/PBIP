@@ -130,7 +130,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Pricing'"
+                  "Value": "'AMAZON Stock Pricing'"
                 }
               }
             },
