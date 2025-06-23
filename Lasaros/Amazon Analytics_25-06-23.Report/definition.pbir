@@ -1,8 +1,0 @@
-{
-  "version": "4.0",
-  "datasetReference": {
-    "byPath": {
-      "path": "../Amazon Analytics_25-06-23.SemanticModel"
-    }
-  }
-}
