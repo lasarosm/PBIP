@@ -1,0 +1,100 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.6.0/schema.json",
+  "name": "61266bf24321d4003728",
+  "position": {
+    "x": 661.978021978022,
+    "y": 303.2967032967033,
+    "z": 2000,
+    "height": 632.967032967033,
+    "width": 596.04395604395609,
+    "tabOrder": 2000
+  },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "HierarchyLevel": {
+                  "Expression": {
+                    "Hierarchy": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "SalesTerritory"
+                        }
+                      },
+                      "Hierarchy": "Territories Hierarchy"
+                    }
+                  },
+                  "Level": "SalesContinent"
+                }
+              },
+              "queryRef": "SalesTerritory.Territories Hierarchy.SalesContinent",
+              "nativeQueryRef": "Territories Hierarchy SalesContinent",
+              "active": true
+            },
+            {
+              "field": {
+                "HierarchyLevel": {
+                  "Expression": {
+                    "Hierarchy": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "SalesTerritory"
+                        }
+                      },
+                      "Hierarchy": "Territories Hierarchy"
+                    }
+                  },
+                  "Level": "SalesCountry"
+                }
+              },
+              "queryRef": "SalesTerritory.Territories Hierarchy.SalesCountry",
+              "nativeQueryRef": "Territories Hierarchy SalesCountry",
+              "active": false
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Base Measures"
+                    }
+                  },
+                  "Property": "COGs"
+                }
+              },
+              "queryRef": "Base Measures.COGs",
+              "nativeQueryRef": "COGs"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "Base Measures"
+                  }
+                },
+                "Property": "COGs"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

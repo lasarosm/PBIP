@@ -1,0 +1,235 @@
+cultureInfo sv-SE
+	translations
+		model Model
+			caption: AWorksAI
+			description: Semantisk modell för internetförsäljningsanalys baserad på AdventureWorks Data Warehouse.
+			table Customer
+				caption: Kund
+				description: Dimensionstabell med kunders demografiska och geografiska attribut. En rad per kund.
+				column 'Customer ID'
+					caption: Kund-ID
+				column Gender
+					caption: Kön
+				column 'Marital Status'
+					caption: Civilstånd
+				column Education
+					caption: Utbildning
+				column Occupation
+					caption: Yrke
+				column City
+					caption: Stad
+				column Country
+					caption: Land
+				column 'Full Name'
+					caption: Fullständigt namn
+				column Age
+					caption: Ålder
+				column 'Income Band'
+					caption: Inkomstband
+				column 'Age Band'
+					caption: Åldersband
+				column 'Occupation Group'
+					caption: Yrkesgrupp
+				hierarchy Geography
+					caption: Geografi
+					level Country
+						caption: Land
+					level City
+						caption: Stad
+					level Customer
+						caption: Kund
+				hierarchy Demographics
+					caption: Demografi
+					level 'Income Band'
+						caption: Inkomstband
+					level Age
+						caption: Ålder
+					level Customer
+						caption: Kund
+			table Product
+				caption: Produkt
+				description: Dimensionstabell med produktattribut, prissättning och kategorihierarki. En rad per produkt.
+				column 'Product ID'
+					caption: Produkt-ID
+				column 'Product Name'
+					caption: Produktnamn
+				column Color
+					caption: Färg
+				column Cost
+					caption: Kostnad
+				column Price
+					caption: Pris
+				column Subcategory
+					caption: Underkategori
+				column Category
+					caption: Kategori
+				column Margin
+					caption: Marginal
+				column 'Price Band'
+					caption: Prisband
+				column 'Data Quality Flag'
+					caption: Datakvalitetsflagga
+				column 'Cost Tier'
+					caption: Kostnadsnivå
+				column 'Price Tier'
+					caption: Prisnivå
+				hierarchy 'Product Category'
+					caption: Produktkategori
+					level Category
+						caption: Kategori
+					level Subcategory
+						caption: Underkategori
+					level 'Product Name'
+						caption: Produktnamn
+			table Date
+				caption: Datum
+				description: Datumdimensionstabell markerad som modellens officiella datumtabell. En rad per kalenderdag.
+				column Date
+					caption: Datum
+				column 'Day Name'
+					caption: Dagnamn
+				column Month
+					caption: Månad
+				column 'Month Number'
+					caption: Månadsnummer
+				column Quarter
+					caption: Kvartal
+				column Year
+					caption: År
+				column 'Year Month'
+					caption: År-Månad
+				column 'Month Sort'
+					caption: Månadssortering
+				column 'Is Weekend'
+					caption: Är helg
+				column 'Data Quality Flag'
+					caption: Datakvalitetsflagga
+				column 'Half Year'
+					caption: Halvår
+				hierarchy Calendar
+					caption: Kalender
+					level Year
+						caption: År
+					level Quarter
+						caption: Kvartal
+					level Month
+						caption: Månad
+					level Date
+						caption: Datum
+				hierarchy 'Week Pattern'
+					caption: Veckomönster
+					level Year
+						caption: År
+					level Month
+						caption: Månad
+					level 'Day Name'
+						caption: Dagnamn
+			table Sales
+				caption: Försäljning
+				description: Faktatabell med individuella internetförsäljningstransaktioner. En rad per orderrad med belopp, kvantiteter, kostnader och datumreferenser.
+				column 'Product ID'
+					caption: Produkt-ID
+				column 'Customer ID'
+					caption: Kund-ID
+				column 'Sales Amount'
+					caption: Försäljningsbelopp
+				column 'Order Quantity'
+					caption: Orderkvantitet
+				column 'Product Cost'
+					caption: Produktkostnad
+				column 'Discount Amount'
+					caption: Rabattbelopp
+				column 'Tax Amount'
+					caption: Skattebelopp
+				column Freight
+					caption: Frakt
+				column 'Order Date'
+					caption: Orderdatum
+				column 'Order Hour'
+					caption: Ordertimme
+				column 'Ship Date'
+					caption: Leveransdatum
+				column 'Due Date'
+					caption: Förfallodatum
+				column 'Time of Day'
+					caption: Tid på dagen
+				column 'Sales Amount Tier'
+					caption: Försäljningsnivå
+			table 'Base Measures'
+				caption: Basmått
+				description: Måttgrupp med alla explicita DAX-mått för försäljningsmodellen, organiserade i visningsmappar efter ämnesområde.
+				measure 'Total Sales Amount'
+					caption: Totalt försäljningsbelopp
+					description: Summan av alla försäljningsbelopp. Primärt nyckeltal för intäktsanalys.
+				measure 'Avg Sales Amount'
+					caption: Snitt försäljningsbelopp
+					description: Genomsnittligt försäljningsbelopp per transaktion.
+				measure 'Min Sales Amount'
+					caption: Min försäljningsbelopp
+				measure 'Max Sales Amount'
+					caption: Max försäljningsbelopp
+				measure 'Sales Count'
+					caption: Antal försäljningar
+					description: Antal försäljningstransaktioner (orderrader).
+				measure 'Total Order Quantity'
+					caption: Total orderkvantitet
+					description: Totalt antal beställda enheter.
+				measure 'Avg Order Quantity'
+					caption: Snitt orderkvantitet
+				measure 'Min Order Quantity'
+					caption: Min orderkvantitet
+				measure 'Max Order Quantity'
+					caption: Max orderkvantitet
+				measure 'Total Product Cost'
+					caption: Total produktkostnad
+					description: Total kostnad för sålda varor (KSV). Används i bruttovinstberäkning.
+				measure 'Avg Product Cost'
+					caption: Snitt produktkostnad
+				measure 'Min Product Cost'
+					caption: Min produktkostnad
+				measure 'Max Product Cost'
+					caption: Max produktkostnad
+				measure 'Total Discount Amount'
+					caption: Totalt rabattbelopp
+					description: Totala rabatter givna på försäljningstransaktioner. Övervaka för överdrivet kampanjbeteende.
+				measure 'Avg Discount Amount'
+					caption: Snitt rabattbelopp
+				measure 'Max Discount Amount'
+					caption: Max rabattbelopp
+				measure 'Discount %'
+					caption: Rabatt %
+					description: Rabattbelopp som andel av bruttointäkt. Övervaka för överdrivet kampanjbeteende.
+				measure 'Total Tax Amount'
+					caption: Totalt skattebelopp
+				measure 'Avg Tax Amount'
+					caption: Snitt skattebelopp
+				measure 'Tax Rate %'
+					caption: Skattesats %
+					description: Effektiv skattesats som andel av försäljningen. Bör förbli stabil om inte produktmix eller jurisdiktion ändras.
+				measure 'Total Freight'
+					caption: Total frakt
+					description: Absolut fraktkostnad. Jämför mot förhandlade transporttariffer.
+				measure 'Avg Freight'
+					caption: Snitt frakt
+				measure 'Freight %'
+					caption: Frakt %
+					description: Logistikkostnad som andel av intäkt. Nyckelför hantering av försörjningskedjan.
+				measure 'Gross Profit'
+					caption: Bruttovinst
+					description: Nettomarginal före rörelsekostnader: Totalt försäljningsbelopp minus Total produktkostnad. Knäckelför lönsamhetsanalys.
+				measure 'Gross Profit Margin %'
+					caption: Bruttovinstmarginal %
+					description: Bruttovinst uttryckt som andel av intäkt. Riktmärket varierar per produktkategori.
+				measure 'Net Sales Amount'
+					caption: Nettoförsäljningsbelopp
+					description: Intäkt efter rabatter — närmare verklig redovisad intäkt än bruttoförsäljning.
+				measure 'Revenue per Unit'
+					caption: Intäkt per enhet
+					description: Genomsnittligt försäljningspris per såld enhet. Spårar priseffektivitet och produktmixförändringar.
+			table 'Calc Group'
+				caption: Beräkningsgrupp
+				description: Beräkningsgrupp för tidsintelligens med 11 beräkningsobjekt (Aktuell, ÅTD, KTD, MTD, Föregående år m.fl.).
+			table 'RLS User Map'
+				caption: RLS Användarmappning
+				description: Frånkopplad mappningstabell för dynamisk radnivåsäkerhet. Mappar UPN-adresser till tillåten region.
+

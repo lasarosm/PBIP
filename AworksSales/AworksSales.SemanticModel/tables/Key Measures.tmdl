@@ -1,0 +1,473 @@
+table 'Key Measures'
+	lineageTag: 50db57b4-d8f1-4979-bd87-ae494964cbdc
+
+	/// Percentage growth compared to previous period
+	measure '% Growth' = DIVIDE([Gross Sales]-[Gross Sales PY],[Gross Sales PY])
+		formatString: #,##0.00 %
+		displayFolder: Growth%
+		lineageTag: b751cb7a-62d6-4f58-b1f8-c8fbb3d02a5d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Gross sales from previous year
+	measure 'Gross Sales PY' = CALCULATE([Gross Sales],SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Gross Sales\Previous
+		lineageTag: 05e24777-866b-4a82-b9ca-668c9c9f0aef
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Month-over-month change in sales
+	measure MoM =
+			
+			CALCULATE([Gross Sales], DATEADD('Date'[Date], -1, MONTH))
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Trends
+		lineageTag: 7d55b9f4-e791-438d-9742-9ec55c816471
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Month-over-month change indicator
+	measure '△ MoM' = [Gross Sales]-[MoM]
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 7b9c9b86-d519-4eba-a4b3-ca01c6280cff
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Percentage month-over-month change
+	measure '% MoM' =
+			
+			VAR __PREV_MONTH = CALCULATE([Gross Sales], DATEADD('Date'[Date], -1, MONTH))
+			RETURN
+				DIVIDE([Gross Sales] - __PREV_MONTH, __PREV_MONTH)
+		formatString: #,##0.00 %
+		displayFolder: Growth%
+		lineageTag: 9f4bd41f-456c-4ad9-9980-f5198fb684b0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Gross sales for European region
+	measure 'Gross Sales Europe' =
+			
+			CALCULATE ( [Gross Sales],
+			    FILTER ( SalesTerritory, SalesTerritory[SalesContinent] = "Europe" )
+			)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Gross Sales\Current
+		lineageTag: 1146e2ce-1181-45f2-a372-1dd5aee26182
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Gross sales for Pacific region
+	measure 'Gross Sales Pacific' =
+			
+			CALCULATE ( [Gross Sales],
+			    FILTER ( SalesTerritory, SalesTerritory[SalesContinent] = "Pacific" )
+			)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Gross Sales\Current
+		lineageTag: df7cd35f-6eda-4185-809d-0d2e9b4e34bf
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Gross sales for North American region
+	measure 'Gross Sales North America' =
+			
+			CALCULATE ( [Gross Sales],
+			    FILTER ( SalesTerritory, SalesTerritory[SalesContinent] = "North America" )
+			)
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Gross Sales\Current
+		lineageTag: 321e4548-3491-4ad0-9757-47c5d94748c4
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Gross sales for North American region in previous year
+	measure 'Gross Sales PY North America' =
+			
+			CALCULATE ( [Gross Sales North America], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Gross Sales\Previous
+		lineageTag: dfde5539-efd4-4582-a27a-b5cb7a11907b
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Units sold in European region for previous year
+	measure 'Units Sold PY Europe' =
+			
+			CALCULATE ( [Units Sold Europe], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Units Sold\Previous
+		lineageTag: b0cb86ae-fba4-45b6-8d62-9ff1f25669b1
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Gross sales for European region in previous year
+	measure 'Gross Sales PY Europe' =
+			
+			CALCULATE ( [Gross Sales Europe], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Gross Sales\Previous
+		lineageTag: aa5d41a3-7985-466a-8f27-a0595846950a
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Cost of goods sold as percentage to average territory
+	measure 'COGS % to Avg Territory' = ```
+			
+			VAR TotalCOGS = SUM(Sales[TotalProductCost])
+			VAR AvgCOGSTerritory = 
+			    CALCULATE(
+			        AVERAGE(Sales[TotalProductCost]),
+			        ALLEXCEPT(Sales, Sales[SalesTerritoryKey])
+			    )
+			RETURN 
+			    DIVIDE(TotalCOGS, AvgCOGSTerritory, 0)
+			```
+		formatString: #,##0.00 %
+		displayFolder: COGs\Averages
+		lineageTag: 22f2ea21-2a59-480a-9fa9-b71e90a4c863
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Cost of goods sold as percentage to average month
+	measure 'COGS % to Avg Month' = ```
+			
+			VAR TotalCOGS = SUM(Sales[TotalProductCost])
+			VAR MonthCount = DISTINCTCOUNT('Date'[YearMonth])
+			VAR AvgCOGSPerMonth = DIVIDE(TotalCOGS, MonthCount, 0)
+			RETURN 
+			    DIVIDE(TotalCOGS, AvgCOGSPerMonth, 0)
+			```
+		formatString: #,##0.00 %
+		displayFolder: COGs\Averages
+		lineageTag: 0e5f502b-7129-4628-a6ef-2f86e8915d79
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Cost of goods sold as percentage to average customer
+	measure 'COGS % to Avg Customer' = ```
+			
+			VAR TotalCOGS = SUM(Sales[TotalProductCost])
+			VAR CustomerCount = DISTINCTCOUNT(Sales[CustomerKey])
+			VAR AvgCOGSPerCustomer = DIVIDE(TotalCOGS, CustomerCount, 0)
+			RETURN 
+			    DIVIDE(TotalCOGS, AvgCOGSPerCustomer, 0)
+			```
+		formatString: #,##0.00 %
+		displayFolder: COGs\Averages
+		lineageTag: 5a9d0bad-69c5-4c2a-828e-dc84d7693e64
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Freight costs as percentage of total sales
+	measure 'Freight % of Sales' =
+			
+			DIVIDE([Freight], [Gross Sales], 0)
+		formatString: #,##0.00 %
+		displayFolder: OPEX
+		lineageTag: 60f3d8db-637b-4b8e-81b6-2c6f00a7d62b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Tax amount as percentage of total sales
+	measure 'Tax % of Sales' =
+			
+			DIVIDE([Tax], [Gross Sales], 0)
+		formatString: #,##0.00 %
+		displayFolder: OPEX
+		lineageTag: 7fdb6b4b-33d3-4866-af12-0dc5db9e5650
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Units sold in European region
+	measure 'Units Sold Europe' =
+			
+			CALCULATE ( [Units Sold],
+			    FILTER ( SalesTerritory, SalesTerritory[SalesContinent] = "Europe" )
+			)
+		formatString: 0
+		displayFolder: Units Sold\Current
+		lineageTag: 5dd0038a-842a-4f02-bb17-2129db0e55c6
+
+	/// Units sold in Pacific region for previous year
+	measure 'Units Sold PY Pacific' =
+			
+			CALCULATE ( [Units Sold Pacific], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,##0.00
+		displayFolder: Units Sold\Previous
+		lineageTag: 23aadb72-7750-4948-bc53-11663c1a5dda
+
+	/// Units sold in Pacific region
+	measure 'Units Sold Pacific' =
+			
+			CALCULATE ( [Units Sold],
+			    FILTER ( SalesTerritory, SalesTerritory[SalesContinent] = "Pacific" )
+			)
+		formatString: 0
+		displayFolder: Units Sold\Current
+		lineageTag: 35a45b74-a9d9-4faf-a86b-95728a01cc9e
+
+	/// Units sold in North American region
+	measure 'Units Sold North America' =
+			
+			CALCULATE ( [Units Sold],
+			    FILTER ( SalesTerritory, SalesTerritory[SalesContinent] = "North America" )
+			)
+		formatString: 0
+		displayFolder: Units Sold\Current
+		lineageTag: dff91d78-bc96-4bfa-b1db-145447f78cd1
+
+	/// Units sold in North American region for previous year
+	measure 'Units Sold PY North America' =
+			
+			CALCULATE ( [Units Sold North America], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: 0
+		displayFolder: Units Sold\Previous
+		lineageTag: 5d9a3e7b-4e2b-41f9-916b-e4185fdf59fd
+
+	/// Average freight cost per order
+	measure 'Avg Freight per Order' =
+			
+			DIVIDE([Freight], DISTINCTCOUNT(Sales[SalesOrderNumber]), 0)
+		formatString: #,##0.00
+		displayFolder: OPEX
+		lineageTag: 20cee320-ac54-4bd9-9d59-c87c591e8964
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Total cost including COGS, freight, and tax per order
+	measure 'Total Cost per Order' = [COGs] + [Freight] + [Tax]
+		formatString: #,##0.00
+		displayFolder: OPEX
+		lineageTag: 1961537f-46c9-4a66-b938-decc72c4fcc2
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Average freight cost per product
+	measure 'Freight per Product' =
+			
+			DIVIDE([Freight], DISTINCTCOUNT(Sales[ProductKey]), 0)
+		formatString: #,##0.00
+		displayFolder: OPEX
+		lineageTag: 2c8e91ef-f165-46de-9e8a-a705e6cfc012
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Net profit after deducting freight costs and tax
+	measure 'Net Profit After Freight & Tax' = [Gross Sales] - [COGs] - [Freight] - [Tax]
+		formatString: #,##0.00
+		displayFolder: OPEX
+		lineageTag: 8c0faf0e-da0e-40d6-ac84-16317eeccb84
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Trend analysis of freight costs over time
+	measure 'Freight Trend' = CALCULATE([Freight], DATESYTD('Date'[Date]))
+		formatString: #,##0.00
+		displayFolder: Trends
+		lineageTag: b1f01a97-034f-4d3b-99e4-933487b0cd53
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Trend analysis of tax amounts over time
+	measure 'Tax Trend' = CALCULATE([Tax], DATESYTD('Date'[Date]))
+		formatString: #,##0.00
+		displayFolder: Trends
+		lineageTag: b0444852-f9cb-420e-a273-7ccbd5bbb33f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Units sold as percentage to average customer
+	measure 'Units Sold % to Avg Customer' = ```
+			
+			VAR TotalUnits = [Units Sold]
+			VAR CustomerCount = DISTINCTCOUNT(Sales[CustomerKey])
+			VAR AvgUnitsPerCustomer = DIVIDE(TotalUnits, CustomerCount, 0)
+			RETURN 
+			    DIVIDE(TotalUnits, AvgUnitsPerCustomer, 0)
+			```
+		formatString: #,##0.00 %
+		displayFolder: Units Sold\Averages
+		lineageTag: f220ad0d-d7fb-4a46-83ff-263ec8e04245
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Units sold as percentage to average month
+	measure 'Units Sold % to Avg Month' = ```
+			
+			VAR TotalUnits = [Units Sold]
+			VAR MonthCount = DISTINCTCOUNT('Date'[YearMonth])
+			VAR AvgUnitsPerMonth = DIVIDE(TotalUnits, MonthCount, 0)
+			RETURN 
+			    DIVIDE(TotalUnits, AvgUnitsPerMonth, 0)
+			```
+		formatString: #,##0.00 %
+		displayFolder: Units Sold\Averages
+		lineageTag: 2b08f278-b24a-429a-9d24-5517cc2e0e6b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Units sold as percentage to average territory
+	measure 'Units Sold % to Avg Territory' = ```
+			
+			VAR TotalUnits = [Units Sold]
+			VAR AvgUnitsTerritory = 
+			    CALCULATE(
+			        AVERAGE(Sales[OrderQuantity]),
+			        ALLEXCEPT(Sales, Sales[SalesTerritoryKey])
+			    )
+			RETURN 
+			    DIVIDE(TotalUnits, AvgUnitsTerritory, 0)
+			```
+		formatString: #,##0.00 %
+		displayFolder: Units Sold\Averages
+		lineageTag: 2bad1ef6-83b1-4414-a350-b8606993e399
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Gross sales as percentage to average customer
+	measure 'Gross Sales % to Avg Customer' = ```
+			
+			VAR TotalGrossSales = [Gross Sales]
+			VAR CustomerCount = DISTINCTCOUNT(Sales[CustomerKey])
+			VAR AvgUnitsPerCustomer = DIVIDE(TotalGrossSales, CustomerCount, 0)
+			RETURN 
+			    DIVIDE(TotalGrossSales, AvgUnitsPerCustomer, 0)
+			```
+		formatString: #,##0.00 %
+		displayFolder: Gross Sales\Averages
+		lineageTag: b28d5282-c132-41a0-9086-acd44e86cf96
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Gross sales as percentage to average month
+	measure 'Gross Sales % to Avg Month' = ```
+			
+			VAR TotalGrossSales = [Gross Sales]
+			VAR MonthCount = DISTINCTCOUNT('Date'[YearMonth])
+			VAR AvgGrossSalesPerMonth = DIVIDE(TotalGrossSales, MonthCount, 0)
+			RETURN 
+			    DIVIDE(TotalGrossSales, AvgGrossSalesPerMonth, 0)
+			```
+		formatString: #,##0.00 %
+		displayFolder: Gross Sales\Averages
+		lineageTag: aefad90e-8246-4f82-9c4a-fbcd915910b3
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Gross sales as percentage to average territory
+	measure 'Gross Sales % to Avg Territory' = ```
+			
+			VAR TotalGrossSales = [Gross Sales]
+			VAR AvgGrossSalesTerritory = 
+			    CALCULATE(
+			        AVERAGE(Sales[SalesAmount]),
+			        ALLEXCEPT(Sales, Sales[SalesTerritoryKey])
+			    )
+			RETURN 
+			    DIVIDE(TotalGrossSales, AvgGrossSalesTerritory, 0)
+			```
+		formatString: #,##0.00 %
+		displayFolder: Gross Sales\Averages
+		lineageTag: 4e703ffb-4cf0-4dba-9fb4-0a2583300ff9
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Cost of goods sold for European region
+	measure 'COGs Europe' =
+			
+			CALCULATE ( [COGs],
+			    FILTER ( SalesTerritory, SalesTerritory[SalesContinent] = "Europe" )
+			)
+		formatString: #,##0.00
+		displayFolder: COGs\Current
+		lineageTag: 3248260a-5fbc-4eca-8a80-b72e35314eb5
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Cost of goods sold for North American region
+	measure 'COGs North America' =
+			
+			CALCULATE ( [COGs],
+			    FILTER ( SalesTerritory, SalesTerritory[SalesContinent] = "North America" )
+			)
+		formatString: #,##0.00
+		displayFolder: COGs\Current
+		lineageTag: 4dfee2b5-b3d7-4e48-a914-37d29b82c47b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Cost of goods sold for Pacific region
+	measure 'COGs Pacific' =
+			
+			CALCULATE ( [COGs],
+			    FILTER ( SalesTerritory, SalesTerritory[SalesContinent] = "Pacific" )
+			)
+		formatString: #,##0.00
+		displayFolder: COGs\Current
+		lineageTag: 1d334899-d3c2-479f-8dd5-8feed9b1a363
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Cost of goods sold for previous year
+	measure 'COGs PY' = CALCULATE([COGs],SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: #,##0.00
+		displayFolder: COGs\Previous
+		lineageTag: a1b2e971-a42f-4256-bd59-b01d4a62264d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Cost of goods sold for European region in previous year
+	measure 'COGs PY Europe' =
+			
+			CALCULATE ( [COGs Europe], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,##0.00
+		displayFolder: COGs\Previous
+		lineageTag: 0dc39c7f-5eec-41a0-aa79-1a8a84c7fff1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Cost of goods sold for North American region in previous year
+	measure 'COGs PY North America' =
+			
+			CALCULATE ( [COGs Label], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		displayFolder: COGs\Previous
+		lineageTag: f1123d3d-6433-4d7e-824e-6cb0b9218496
+
+	/// Cost of goods sold for Pacific region in previous year
+	measure 'COGs PY Pacific' = CALCULATE ( [COGs Pacific], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,##0.00
+		displayFolder: COGs\Previous
+		lineageTag: 9bb600f5-8e13-4817-9fca-dd1a500b6581
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Gross sales for Pacific region in previous year
+	measure 'Gross Sales PY Pacific' =
+			
+			CALCULATE ( [Gross Sales Pacific], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: #,##0.00
+		displayFolder: Gross Sales\Previous
+		lineageTag: fe20ebbf-f4c5-47ef-85c5-ec6903f82de1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Units sold in previous year
+	measure 'Units Sold PY' = CALCULATE([Units Sold],SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: 0
+		displayFolder: Units Sold\Previous
+		lineageTag: ca821cd5-c315-4a76-a161-7c19f3847be1
+
+	partition 'Key Measures' = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Column1"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_ResultType = Table
+

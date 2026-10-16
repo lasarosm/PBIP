@@ -1,0 +1,222 @@
+/// Date dimension table marked as the model's official date table. One row per calendar day. Use for all time-intelligence filtering.
+table Date
+	lineageTag: 5ce911a9-74b2-4503-8dbd-7b03a70024f0
+	dataCategory: Time
+
+	/// Calendar date — the primary key of the Date table
+	column Date
+		dataType: dateTime
+		isHidden
+		isKey
+		formatString: dd/MM/yyyy
+		lineageTag: 53d1a1b7-301d-4552-b957-29ed683390fc
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation Synonyms = calendar date|day|when|time|period
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Full name of the day of the week (e.g. Monday)
+	column 'Day Name'
+		dataType: string
+		isHidden
+		displayFolder: Calendar
+		lineageTag: 4cfc69bd-b0b9-423f-83dd-a1fb2bae1805
+		summarizeBy: none
+		sourceColumn: Day Name
+
+		annotation Synonyms = weekday name|day of week|name of day
+
+	/// Full name of the month (e.g. January)
+	column Month
+		dataType: string
+		isHidden
+		displayFolder: Calendar
+		lineageTag: baea6fd0-8690-4cd1-a497-d9f0ce213293
+		summarizeBy: none
+		sourceColumn: Month
+		sortByColumn: 'Month Number'
+
+		annotation Synonyms = month name|calendar month|period name
+
+	/// Numeric month number (1 = January, 12 = December) — used for sorting
+	column 'Month Number'
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Sort Keys
+		lineageTag: 41e46d13-4790-4ae1-820e-ebfa5531f703
+		summarizeBy: none
+		sourceColumn: MonthNumberOfYear
+
+		annotation Synonyms = month num|month index|month of year|month no
+
+	/// Calendar quarter number (1–4)
+	column Quarter
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Calendar
+		lineageTag: ed925994-2fc2-43b5-8377-4cd181d275f4
+		summarizeBy: none
+		sourceColumn: Quarter
+
+		annotation Synonyms = q|qtr|fiscal quarter|calendar quarter|three months
+
+	/// Calendar year (e.g. 2023)
+	column Year
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Calendar
+		lineageTag: 7093f777-2381-457c-a872-775f224f010c
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation Synonyms = yr|fiscal year|calendar year|annual
+
+	/// Year and month label for display (e.g. 2023-01) — sorts by Month Sort
+	column 'Year Month'
+		dataType: string
+		displayFolder: Calendar
+		lineageTag: de8181be-0027-4787-acd3-cd52f6e8c1a1
+		summarizeBy: none
+		sourceColumn: Year-Month
+		sortByColumn: 'Month Sort'
+
+		annotation Synonyms = ym|month year|period label|year period
+
+	/// Numeric sort key for Year Month (Year × 100 + Month Number)
+	column 'Month Sort'
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Sort Keys
+		lineageTag: 10e21e6e-8590-4655-9741-39124eef7c1b
+		summarizeBy: none
+		sourceColumn: Month Sort
+
+		annotation Synonyms = sort key|month sort key|month order|sort order
+
+	/// Indicates whether the date falls on a weekend (Yes / No)
+	column 'Is Weekend'
+		dataType: string
+		displayFolder: Calendar
+		lineageTag: 3ca801c7-a149-40bd-8e48-8ffeb378c84d
+		summarizeBy: none
+		sourceColumn: Is Weekend
+
+		annotation Synonyms = weekend|weekday|saturday sunday|working day
+
+	/// Data quality indicator — flags missing dates
+	column 'Data Quality Flag'
+		dataType: string
+		displayFolder: Data Quality
+		lineageTag: 6e092441-ffa2-48f6-b6c9-94258b2bf66e
+		summarizeBy: none
+		sourceColumn: Data Quality Flag
+
+		annotation Synonyms = dq flag|date quality|quality check
+
+	/// Calendar quarter grouped into first and second half of year
+	column 'Half Year' = IF('Date'[Quarter] <= 2, "H1 (Jan–Jun)", "H2 (Jul–Dec)")
+		dataType: string
+		displayFolder: Groups & Bins
+		lineageTag: 87d78e8c-a90e-4683-b6f5-a0f0745ee992
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Standard calendar drill-down from year to individual date. Use for time-series analysis and time-intelligence visuals.
+	hierarchy Calendar
+		displayFolder: Hierarchies
+		lineageTag: 889d18f9-2acb-4295-a7b4-38089b948ae7
+
+		level Year
+			lineageTag: 9454e99e-aff1-4c13-b7de-1af2074bd4de
+			column: Year
+
+		level Quarter
+			lineageTag: 2b30433d-5b43-46a3-9597-4c39b3130aaf
+			column: Quarter
+
+		level Month
+			lineageTag: e4d0e073-9db7-4429-bfcb-6b92d25bfc1a
+			column: Month
+
+		level Date
+			lineageTag: 51ee3d00-adeb-45c3-a54f-fc0a7c797d5d
+			column: Date
+
+	/// Drill from year into individual day names. Useful for weekend vs weekday analysis and day-of-week patterns.
+	hierarchy 'Week Pattern'
+		displayFolder: Hierarchies
+		lineageTag: 01714247-4d6a-48bc-b059-cd0b30dbfd19
+
+		level Year
+			lineageTag: 2acf28f8-1eeb-4d3e-ad9d-30595754a979
+			column: Year
+
+		level Month
+			lineageTag: cc05c6d6-1ae4-439e-b845-5edefb4a8625
+			column: Month
+
+		level 'Day Name'
+			lineageTag: da175d84-5760-463f-a620-e53ef99cb7fa
+			column: 'Day Name'
+
+	partition Date = m
+		mode: import
+		source = ```
+				let
+				    Source = Sql.Database(Server, Database),
+				    DimDate = Source{[Schema="dbo",Item="DimDate"]}[Data],
+				
+				    // Select relevant columns
+				    SelectedColumns = Table.SelectColumns(DimDate, {
+				        "DateKey", "FullDateAlternateKey", "EnglishDayNameOfWeek",
+				        "EnglishMonthName", "MonthNumberOfYear", "CalendarQuarter",
+				        "CalendarYear"
+				    }),
+				
+				    // Rename
+				    Renamed = Table.RenameColumns(SelectedColumns, {
+				        {"DateKey", "Date ID"},
+				        {"FullDateAlternateKey", "Date"},
+				        {"EnglishDayNameOfWeek", "Day Name"},
+				        {"EnglishMonthName", "Month"},
+				        {"CalendarQuarter", "Quarter"},
+				        {"CalendarYear", "Year"}
+				    }),
+				
+				    // Derived columns
+				    YearMonth = Table.AddColumn(Renamed, "Year-Month", each 
+				        Text.From([Year]) & "-" & Text.PadStart(Text.From([MonthNumberOfYear]), 2, "0")
+				    ),
+				
+				    MonthSort = Table.AddColumn(YearMonth, "Month Sort", each [Year] * 100 + [MonthNumberOfYear]),
+				
+				    // Weekend flag
+				    WeekendFlag = Table.AddColumn(MonthSort, "Is Weekend", each 
+				        if [Day Name] = "Saturday" or [Day Name] = "Sunday" then "Yes"
+				        else "No"
+				    ),
+				
+				    // Data Quality Flag
+				    QualityFlag = Table.AddColumn(WeekendFlag, "Data Quality Flag", each
+				        if [Date] = null then "Missing Date"
+				        else "OK"
+				    ),
+				
+				    // Final types
+				    FinalTypes = Table.TransformColumnTypes(QualityFlag,{{"Date ID", Int64.Type}, {"Date", type date}, {"Year", Int64.Type}, {"MonthNumberOfYear", Int64.Type}, {"Is Weekend", type text}, {"Month Sort", Int64.Type}, {"Year-Month", type text}, {"Quarter", Int64.Type}}),
+				    #"Removed Columns" = Table.RemoveColumns(FinalTypes,{"Date ID"})
+				
+				in
+				    #"Removed Columns"
+				```
+
+	annotation Synonyms = calendar|time|dates|periods|days|when
+

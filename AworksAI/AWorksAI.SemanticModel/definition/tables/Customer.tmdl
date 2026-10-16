@@ -1,0 +1,253 @@
+/// Dimension table containing customer demographic and geographic attributes. One row per customer.
+table Customer
+	lineageTag: f5f6af81-b7df-4183-bcd7-a9d14420df80
+
+	/// Unique identifier for each customer
+	column 'Customer ID'
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		lineageTag: 48453f7a-359d-4985-9232-c5d358f03216
+		summarizeBy: none
+		sourceColumn: Customer ID
+
+		annotation Synonyms = client|buyer|consumer|shopper|account|person
+
+	/// Customer's gender (Male / Female)
+	column Gender
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: 77c6e66d-0641-4065-b8b2-3e4199a2c7bf
+		summarizeBy: none
+		sourceColumn: Gender
+
+		annotation Synonyms = sex|male female
+
+	/// Customer's marital status (Married / Single)
+	column 'Marital Status'
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: 372624d6-dbb8-47f1-85e0-c6ae68ed8f2c
+		summarizeBy: none
+		sourceColumn: MaritalStatus
+
+		annotation Synonyms = relationship status|married single|civil status
+
+	/// Highest level of education attained by the customer
+	column Education
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: 21d135c6-7805-43f9-a1d1-6d573a45a058
+		summarizeBy: none
+		sourceColumn: Education
+
+		annotation Synonyms = qualification|degree|schooling|academic level
+
+	/// Customer's current occupation or job role
+	column Occupation
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: 9c3695bf-3f7f-41dc-8c8b-75d0553f49bc
+		summarizeBy: none
+		sourceColumn: Occupation
+
+		annotation Synonyms = job|profession|role|career|employment|work
+
+	/// City where the customer resides
+	column City
+		dataType: string
+		isHidden
+		displayFolder: Geography
+		lineageTag: 0a20b944-b38a-4fe1-8d81-ec2c445a74f1
+		dataCategory: City
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation Synonyms = town|location|place|municipality
+
+	/// Country where the customer resides
+	column Country
+		dataType: string
+		isHidden
+		displayFolder: Geography
+		lineageTag: e3730e23-4e86-45c5-bfeb-2dd3733c7a70
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation Synonyms = nation|region|territory|land
+
+	/// Customer's full name (First Name + Last Name)
+	column 'Full Name'
+		dataType: string
+		isHidden
+		displayFolder: Identity
+		lineageTag: 3ec96725-215f-4cba-a379-589e36a287cb
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Full Name
+
+		annotation Synonyms = name|customer name|client name|person name
+
+	/// Calculated age of the customer based on birth date
+	column Age
+		dataType: int64
+		isHidden
+		formatString: 0
+		displayFolder: Demographics
+		lineageTag: c9b2ca46-1681-4edd-b18d-b4e21fc81a99
+		summarizeBy: none
+		sourceColumn: Age
+
+		annotation Synonyms = years old|how old|age group
+
+	/// Income band grouping: Low (under 40K), Medium (40K–80K), High (80K+)
+	column 'Income Band'
+		dataType: string
+		isHidden
+		displayFolder: Demographics
+		lineageTag: b274fc1c-d58e-43ed-ad71-4fc86b4da1c4
+		summarizeBy: none
+		sourceColumn: Income Band
+
+		annotation Synonyms = salary range|earnings band|wage band|income group|pay band
+
+	/// Age grouped into generational bands for demographic segmentation
+	column 'Age Band' = SWITCH(TRUE(), Customer[Age] >= 18 && Customer[Age] <= 25, "18–25", Customer[Age] >= 26 && Customer[Age] <= 35, "26–35", Customer[Age] >= 36 && Customer[Age] <= 45, "36–45", Customer[Age] >= 46 && Customer[Age] <= 55, "46–55", Customer[Age] >= 56 && Customer[Age] <= 65, "56–65", Customer[Age] > 65, "65+", "Unknown")
+		dataType: string
+		displayFolder: Groups & Bins
+		lineageTag: 7fb8a7d1-6200-47a3-957a-172de5ffefb8
+
+	/// Occupation grouped into broad workforce segments for demographic analysis
+	column 'Occupation Group' = SWITCH(Customer[Occupation], "Professional", "White Collar", "Management", "White Collar", "Clerical", "White Collar", "Skilled Manual", "Blue Collar", "Manual", "Blue Collar", "Other")
+		dataType: string
+		displayFolder: Groups & Bins
+		lineageTag: 9299a609-95ce-4dd5-a09a-c746a525ce08
+
+	/// Geographic drill-down from country to individual customer. Use for regional sales and customer distribution analysis.
+	hierarchy Geography
+		displayFolder: Hierarchies
+		lineageTag: 840ddbde-bf55-4469-8892-9a13b1e00374
+
+		level Country
+			lineageTag: cddf75fa-653f-41d8-ad97-20c6f135fb7a
+			column: Country
+
+		level City
+			lineageTag: 88dd26e5-0956-4903-8a32-cdf734f3bf26
+			column: City
+
+		level Customer
+			lineageTag: 01c53c8f-007b-43e7-b9db-8e67c86220d5
+			column: 'Full Name'
+
+	/// Customer demographic drill-down from income band through age to individual customer. Use for customer segmentation and profiling.
+	hierarchy Demographics
+		displayFolder: Hierarchies
+		lineageTag: 140d6e45-f623-4648-90dd-846340024eda
+
+		level 'Income Band'
+			lineageTag: 325182d1-bbf8-4486-b071-18212fcb3d8e
+			column: 'Income Band'
+
+		level Age
+			lineageTag: 95349687-3526-4852-8b84-f9304b13d293
+			column: Age
+
+		level Customer
+			lineageTag: 59713eaf-9ec6-4d3c-a212-9a91559ed9f2
+			column: 'Full Name'
+
+	partition Customer = m
+		mode: import
+		source = ```
+				let
+				    // 1. Data Source (Dynamic via parameters)
+				    Source = Sql.Database(Server, Database),
+				    DimCustomer = Source{[Schema="dbo",Item="DimCustomer"]}[Data],
+				    DimGeography = Source{[Schema="dbo",Item="DimGeography"]}[Data],
+				
+				    // 2. Select only relevant columns early
+				    SelectedColumns = Table.SelectColumns(DimCustomer, {
+				        "CustomerKey", "FirstName", "LastName", "Gender",
+				        "BirthDate", "MaritalStatus", "YearlyIncome",
+				        "EnglishEducation", "EnglishOccupation", "GeographyKey"
+				    }),
+				
+				    // 3. Table Integration (Geography)
+				    MergeGeography = Table.NestedJoin(
+				        SelectedColumns, {"GeographyKey"},
+				        DimGeography, {"GeographyKey"},
+				        "Geography", JoinKind.LeftOuter
+				    ),
+				    ExpandedGeography = Table.ExpandTableColumn(
+				        MergeGeography,
+				        "Geography",
+				        {"City", "EnglishCountryRegionName"},
+				        {"City", "Country"}
+				    ),
+				
+				    // 4. Business-friendly transformations
+				    RenamedColumns = Table.RenameColumns(ExpandedGeography, {
+				        {"CustomerKey", "Customer ID"},
+				        {"FirstName", "First Name"},
+				        {"LastName", "Last Name"},
+				        {"YearlyIncome", "Yearly Income"},
+				        {"EnglishEducation", "Education"},
+				        {"EnglishOccupation", "Occupation"}
+				    }),
+				
+				    // Replace coded values
+				    GenderReplaced = Table.ReplaceValue(RenamedColumns, "M", "Male", Replacer.ReplaceValue, {"Gender"}),
+				    GenderFinal = Table.ReplaceValue(GenderReplaced, "F", "Female", Replacer.ReplaceValue, {"Gender"}),
+				
+				    // 5. Data Quality Improvements
+				    ReplaceNulls = Table.ReplaceValue(GenderFinal, null, "Unknown", Replacer.ReplaceValue,
+				        {"Gender", "MaritalStatus", "Education", "Occupation", "City", "Country"}),
+				
+				    // 6. Derived Columns
+				    FullName = Table.AddColumn(ReplaceNulls, "Full Name", each [First Name] & " " & [Last Name], type text),
+				    Age = Table.AddColumn(FullName, "Age", each Date.Year(DateTime.LocalNow()) - Date.Year([BirthDate]), Int64.Type),
+				
+				    // Income band grouping (reduce cardinality)
+				    IncomeBand = Table.AddColumn(Age, "Income Band", each 
+				        if [Yearly Income] < 40000 then "Low"
+				        else if [Yearly Income] < 80000 then "Medium"
+				        else "High"
+				    ),
+				
+				    // 7. Data quality flags
+				    QualityFlag = Table.AddColumn(IncomeBand, "Data Quality Flag", each
+				        if [BirthDate] = null then "Missing BirthDate"
+				        else if [Yearly Income] < 0 then "Invalid Income"
+				        else "OK"
+				    ),
+				
+				    // 9. Cleanup
+				    RemovedColumns = Table.RemoveColumns(QualityFlag, {"GeographyKey"}),
+				
+				    // 10. Data types (final)
+				    FinalTypes = Table.TransformColumnTypes(RemovedColumns, {
+				        {"Customer ID", Int64.Type},
+				        {"BirthDate", type date},
+				        {"Yearly Income", Currency.Type},
+				        {"Age", Int64.Type}
+				    }),
+				    #"Removed Columns" = Table.RemoveColumns(FinalTypes,{"Yearly Income"}),
+				    #"Replaced Value" = Table.ReplaceValue(#"Removed Columns","M","Married",Replacer.ReplaceText,{"MaritalStatus"}),
+				    #"Replaced Value1" = Table.ReplaceValue(#"Replaced Value","S","Single",Replacer.ReplaceText,{"MaritalStatus"}),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Replaced Value1",{"BirthDate", "First Name", "Last Name"}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Removed Columns1",{{"Income Band", type text}}),
+				    #"Removed Columns2" = Table.RemoveColumns(#"Changed Type",{"Data Quality Flag"})
+				
+				in
+				    #"Removed Columns2"
+				```
+
+	annotation Synonyms = clients|buyers|consumers|shoppers|accounts|people|users
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

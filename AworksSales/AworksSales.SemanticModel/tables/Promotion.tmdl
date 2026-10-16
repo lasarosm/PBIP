@@ -1,0 +1,141 @@
+table Promotion
+	lineageTag: 38f889b1-8874-4951-9b10-e7dd9db22647
+
+	column PromotionKey
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		lineageTag: 2ae19f06-6f3f-42c2-aa7e-60cc53380716
+		summarizeBy: none
+		sourceColumn: PromotionKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Promotion
+		dataType: string
+		isHidden
+		lineageTag: 2709a924-23a9-48fb-a18b-61e26be82d76
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Promotion
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiscountPct
+		dataType: double
+		formatString: #,##0.00 %
+		displayFolder: Promotion Details
+		lineageTag: 4cdb3a32-3db9-49fa-ae87-d55e81b0ac1c
+		summarizeBy: none
+		sourceColumn: DiscountPct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column PromotionType
+		dataType: string
+		isHidden
+		lineageTag: 1a218a01-4e4f-4fee-becc-1473159b18af
+		summarizeBy: none
+		sourceColumn: PromotionType
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PromotionCategory
+		dataType: string
+		isHidden
+		lineageTag: e1765a4a-cf4d-4dfb-9058-29dfbe4db646
+		summarizeBy: none
+		sourceColumn: PromotionCategory
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column StartDate
+		dataType: dateTime
+		formatString: Long Date
+		displayFolder: Promotion Details
+		lineageTag: 47b18319-e3a4-4405-9a0f-46708f812fdc
+		summarizeBy: none
+		sourceColumn: StartDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column EndDate
+		dataType: dateTime
+		formatString: Long Date
+		displayFolder: Promotion Details
+		lineageTag: ee06090a-f70c-4565-8a5a-7b40ec2ac49d
+		summarizeBy: none
+		sourceColumn: EndDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column MinQty
+		dataType: int64
+		formatString: 0
+		displayFolder: Promotion Details
+		lineageTag: 9c02a6e0-8646-4226-9ef5-cf7aae1ec636
+		summarizeBy: none
+		sourceColumn: MinQty
+
+		annotation SummarizationSetBy = Automatic
+
+	column MaxQty
+		dataType: int64
+		formatString: 0
+		displayFolder: Promotion Details
+		lineageTag: d6c69fa7-564d-4c2f-b8af-95fc4ad86519
+		summarizeBy: none
+		sourceColumn: MaxQty
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy Promotions
+		lineageTag: 602dd75d-a8f5-44db-81d5-ea60e1898dee
+
+		level PromotionCategory
+			lineageTag: 1a96ce46-88a3-403c-a6b6-fae6b9987cd8
+			column: PromotionCategory
+
+		level PromotionType
+			lineageTag: 51fcd8df-6de0-4698-8a4e-1904499592d7
+			column: PromotionType
+
+		level Promotion
+			lineageTag: e599ec2c-9003-421b-bfe0-428e03fefef0
+			column: Promotion
+
+		changedProperty = IsHidden
+
+	partition Promotion = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(Server, DB),
+				     dbo_DimPromotion = Source{[Schema="dbo",Item="DimPromotion"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(dbo_DimPromotion,{"PromotionAlternateKey"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"EnglishPromotionName", "Promotion"}}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Renamed Columns",{"PromotionKey", "Promotion", "DiscountPct", "EnglishPromotionType", "EnglishPromotionCategory", "StartDate", "EndDate", "MinQty", "MaxQty"}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Other Columns",{{"EnglishPromotionType", "PromotionType"}, {"EnglishPromotionCategory", "PromotionCategory"}}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns1",{{"StartDate", type date}, {"EndDate", type date}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

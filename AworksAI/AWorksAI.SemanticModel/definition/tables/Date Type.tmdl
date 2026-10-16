@@ -1,0 +1,36 @@
+table 'Date Type'
+	lineageTag: 1cff8c92-744d-461e-b720-14c906ebf3f7
+
+	/// Switches the active date relationship on Sales. Use alongside the TI Patterns calc group. Order Date is the default (active) relationship; Ship Date and Due Date activate their respective inactive relationships via USERELATIONSHIP.
+	calculationGroup
+		precedence: 20
+
+		/// Filters Sales by Order Date — the default active relationship.
+		calculationItem 'Order Date' = SELECTEDMEASURE()
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Filters Sales by Ship Date using USERELATIONSHIP to activate the inactive relationship.
+		calculationItem 'Ship Date' =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    USERELATIONSHIP(Sales[Ship Date], 'Date'[Date])
+				)
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Filters Sales by Due Date using USERELATIONSHIP to activate the inactive relationship.
+		calculationItem 'Due Date' =
+				CALCULATE(
+				    SELECTEDMEASURE(),
+				    USERELATIONSHIP(Sales[Due Date], 'Date'[Date])
+				)
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+	column 'Date Type'
+		dataType: string
+		lineageTag: 5722954d-3ef7-47c0-bfb1-4f8e60eddb87
+
+	partition 'Partition_Date Type' = calculationGroup
+

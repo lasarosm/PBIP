@@ -1,0 +1,16 @@
+relationship eea410d0-e6e0-4d49-bab7-675f30d58b0b
+	fromColumn: Sales.CustomerKey
+	toColumn: Customer.CustomerKey
+
+	annotation PBI_IsFromSource = FS
+
+relationship 8f6ff5bb-2641-4aa3-b0d7-152cb847639a
+	fromColumn: Sales.ProductKey
+	toColumn: Product.ProductKey
+
+	annotation PBI_IsFromSource = FS
+
+relationship 21e23b4c-b137-d2af-294a-5c6ecd281f05
+	fromColumn: Sales.OrderDate
+	toColumn: Date.Date
+

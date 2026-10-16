@@ -1,0 +1,75 @@
+table Sales
+	lineageTag: 40273546-f255-4811-b8ff-73e28a1f26d1
+
+	column ProductKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 1092edc2-0374-49e4-9750-0118b750a48a
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column CustomerKey
+		dataType: int64
+		formatString: 0
+		lineageTag: e0e791e3-2569-4f58-89c4-01a850ba0733
+		summarizeBy: none
+		sourceColumn: CustomerKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderQuantity
+		dataType: int64
+		formatString: 0
+		lineageTag: dd0840c6-e1bf-4099-a044-65d1019d1688
+		summarizeBy: sum
+		sourceColumn: OrderQuantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column TotalProductCost
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 62eed0ac-ff51-4dd1-b1ed-bf088b96b5e6
+		summarizeBy: sum
+		sourceColumn: TotalProductCost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column SalesAmount
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: e24042b1-2d32-432b-bc17-9046b17a2a03
+		summarizeBy: sum
+		sourceColumn: SalesAmount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column OrderDate
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 25d934d2-3357-419d-80fe-4e0bf9e22cb7
+		summarizeBy: none
+		sourceColumn: OrderDate
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Sales = m
+		mode: import
+		source =
+				let
+				  Source = Sql.Database("lmc.database.windows.net", "AdventureWorksDW2024" ),
+				  #"Navigation 1" = Source{[Schema = "dbo", Item = "FactInternetSales"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(#"Navigation 1",{"ProductKey", "CustomerKey", "OrderQuantity", "TotalProductCost", "SalesAmount", "OrderDate"})
+				in
+				  #"Removed Other Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

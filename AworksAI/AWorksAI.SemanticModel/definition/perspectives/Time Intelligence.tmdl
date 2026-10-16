@@ -1,0 +1,57 @@
+/// For report authors building time-intelligence visuals. Focused on the Date table, calendar hierarchies and all time-related measures.
+perspective 'Time Intelligence'
+
+	perspectiveTable Date
+
+		perspectiveColumn Date
+
+		perspectiveColumn Year
+
+		perspectiveColumn Quarter
+
+		perspectiveColumn Month
+
+		perspectiveColumn 'Month Number'
+
+		perspectiveColumn 'Day Name'
+
+		perspectiveColumn 'Year Month'
+
+		perspectiveColumn 'Month Sort'
+
+		perspectiveColumn 'Is Weekend'
+
+		perspectiveColumn 'Half Year'
+
+		perspectiveHierarchy Calendar
+
+		perspectiveHierarchy 'Week Pattern'
+
+	perspectiveTable 'Base Measures'
+
+		perspectiveMeasure 'Total Sales Amount'
+
+		perspectiveMeasure 'Avg Sales Amount'
+
+		perspectiveMeasure 'Min Sales Amount'
+
+		perspectiveMeasure 'Max Sales Amount'
+
+		perspectiveMeasure 'Sales Count'
+
+		perspectiveMeasure 'Total Order Quantity'
+
+		perspectiveMeasure 'Gross Profit'
+
+		perspectiveMeasure 'Gross Profit Margin %'
+
+		perspectiveMeasure 'Net Sales Amount'
+
+		perspectiveMeasure 'Total Product Cost'
+
+		perspectiveMeasure 'Total Discount Amount'
+
+		perspectiveMeasure 'Total Tax Amount'
+
+		perspectiveMeasure 'Total Freight'
+

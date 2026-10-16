@@ -1,0 +1,126 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 18.181818181818183,
+        "y": 26.262626262626263
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 821.38305001469382,
+            "y": 2
+          },
+          "nodeIndex": "Customer",
+          "nodeLineageTag": "f5f6af81-b7df-4183-bcd7-a9d14420df80",
+          "size": {
+            "height": 343,
+            "width": 234
+          },
+          "zIndex": 7
+        },
+        {
+          "location": {
+            "x": 464.38305001469382,
+            "y": 15
+          },
+          "nodeIndex": "Date",
+          "nodeLineageTag": "5ce911a9-74b2-4503-8dbd-7b03a70024f0",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 4
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": -11.4372382003246
+          },
+          "nodeIndex": "Product",
+          "nodeLineageTag": "92ddc8a4-5f69-419e-bc4f-c4c37ff21c7b",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 5
+        },
+        {
+          "location": {
+            "x": 465.11065210227622,
+            "y": 433.70707070707067
+          },
+          "nodeIndex": "Sales",
+          "nodeLineageTag": "ba262a2b-bfe6-423e-96be-f752558ebf5b",
+          "size": {
+            "height": 396,
+            "width": 234
+          },
+          "zIndex": 6
+        },
+        {
+          "location": {
+            "x": 1154.74668637833,
+            "y": 4.1984170799602794
+          },
+          "nodeIndex": "Base Measures",
+          "nodeLineageTag": "08844408-a2b5-4cb8-8429-8224a86fb5ba",
+          "size": {
+            "height": 200,
+            "width": 234
+          },
+          "zIndex": 3
+        },
+        {
+          "location": {
+            "x": 1153.3931510247944,
+            "y": 228.67316455470777
+          },
+          "nodeIndex": "Calc Group",
+          "nodeLineageTag": "1aa2cd85-7e2f-4cf0-802e-a1bb2ac65e14",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 1
+        },
+        {
+          "location": {
+            "x": 1154.0598176914616,
+            "y": 350.89538677692997
+          },
+          "nodeIndex": "Date Type",
+          "nodeLineageTag": "1cff8c92-744d-461e-b720-14c906ebf3f7",
+          "size": {
+            "height": 104,
+            "width": 234
+          },
+          "zIndex": 2
+        },
+        {
+          "location": {
+            "x": 1153.0497166813602,
+            "y": 472.22872011026323
+          },
+          "nodeIndex": "RLS User Map",
+          "nodeLineageTag": "d29bf813-8e9b-4f71-b980-e8ab9cba7d6e",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 8
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 99,
+      "pinKeyFieldsToTop": true,
+      "showExtraHeaderInfo": true,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}

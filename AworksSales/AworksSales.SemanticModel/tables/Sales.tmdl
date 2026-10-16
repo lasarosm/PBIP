@@ -1,0 +1,275 @@
+table Sales
+	isHidden
+	lineageTag: dd8dc364-957f-4f00-8d3c-f9d056362f9a
+
+	refreshPolicy
+		policyType: basic
+		rollingWindowGranularity: year
+		rollingWindowPeriods: 2
+		incrementalGranularity: day
+		incrementalPeriods: 14
+		sourceExpression =
+			let
+			    Source = Sql.Database(Server, DB),
+			     dbo_FactInternetSales = Source{[Schema="dbo",Item="FactInternetSales"]}[Data],
+			    #"Removed Other Columns" = Table.SelectColumns(dbo_FactInternetSales,{"SalesOrderNumber", "SalesOrderLineNumber", "OrderDate", "DueDate", "ShipDate", "ProductKey", "CustomerKey", "PromotionKey", "SalesTerritoryKey", "OrderQuantity", "UnitPrice", "DiscountAmount", "TotalProductCost", "SalesAmount", "TaxAmt", "Freight"}),
+			    #"Added Net Price" = Table.AddColumn(#"Removed Other Columns", "Net Price", each ([SalesAmount] - [DiscountAmount]) / [OrderQuantity]),
+			    #"Filtered Rows" = Table.SelectRows(#"Added Net Price", each [OrderDate] >= RangeStart and [OrderDate] < RangeEnd),
+			    #"Added Custom" = Table.AddColumn(#"Filtered Rows", "YearCol", each Date.Year([OrderDate])),
+			    #"Duplicated Column" = Table.DuplicateColumn(#"Added Custom", "OrderDate", "OrderDate - Copy"),
+			    #"Renamed Columns" = Table.RenameColumns(#"Duplicated Column",{{"OrderDate - Copy", "Time"}}),
+			    #"Reordered Columns" = Table.ReorderColumns(#"Renamed Columns",{"SalesOrderNumber", "SalesOrderLineNumber", "OrderDate", "Time", "DueDate", "ShipDate", "ProductKey", "CustomerKey", "PromotionKey", "SalesTerritoryKey", "OrderQuantity", "UnitPrice", "DiscountAmount", "TotalProductCost", "SalesAmount", "TaxAmt", "Freight", "Net Price", "YearCol"}),
+			    #"Changed Net Price Type" = Table.TransformColumnTypes(#"Reordered Columns",{{"Net Price", Currency.Type}})
+			in
+			    #"Changed Net Price Type"
+
+	column ProductKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 699f0713-03db-490c-903e-f3a4603824aa
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column CustomerKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 04b3b00b-8c9a-40ab-9189-a0b981513c93
+		summarizeBy: none
+		sourceColumn: CustomerKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesOrderNumber
+		dataType: string
+		isHidden
+		lineageTag: 075cc019-ce37-47a5-b57d-6f6fab6797ed
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: SalesOrderNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesOrderLineNumber
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b1583e80-80e9-4c10-8aaf-1be318a765b0
+		summarizeBy: sum
+		sourceColumn: SalesOrderLineNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderQuantity
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ca1a3aaa-c828-42dc-87b4-2b0e1648b7d3
+		summarizeBy: sum
+		sourceColumn: OrderQuantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesAmount
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: e18d5c9a-7969-4f4e-8860-bc230d82cbb8
+		summarizeBy: sum
+		sourceColumn: SalesAmount
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column TaxAmt
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: e6c1d6d4-6719-4881-8118-bb725390a8d3
+		summarizeBy: sum
+		sourceColumn: TaxAmt
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column Freight
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: dfb59380-b617-4cbd-83d8-a173a5edab71
+		summarizeBy: sum
+		sourceColumn: Freight
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column OrderDate
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: a62464fd-542a-4157-b709-2674b3f6c0eb
+		summarizeBy: none
+		sourceColumn: OrderDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column DueDate
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: a29af5a0-ea8a-4766-a41c-6be4ac4d030d
+		summarizeBy: none
+		sourceColumn: DueDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column ShipDate
+		dataType: dateTime
+		isHidden
+		formatString: yyyy-mm-dd
+		lineageTag: dee48348-5e5d-4c52-b521-9c423a9ae572
+		summarizeBy: none
+		sourceColumn: ShipDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column TotalProductCost
+		dataType: decimal
+		isHidden
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: bd4340ca-043c-452e-a0f5-694156eb0c97
+		summarizeBy: sum
+		sourceColumn: TotalProductCost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column SalesTerritoryKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: eca98670-0af2-4d95-9065-d26fe8d288fa
+		summarizeBy: none
+		sourceColumn: SalesTerritoryKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearCol
+		dataType: string
+		lineageTag: bb70ea16-41be-48f8-8259-32fda311099f
+		summarizeBy: none
+		sourceColumn: YearCol
+
+		annotation SummarizationSetBy = Automatic
+
+	column PromotionKey
+		dataType: int64
+		formatString: 0
+		lineageTag: c1b158b4-40da-41aa-9633-91272f618d46
+		summarizeBy: none
+		sourceColumn: PromotionKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitPrice
+		dataType: decimal
+		lineageTag: 85147960-3fc4-4ea1-b6ea-dfa1f5dc29ae
+		summarizeBy: sum
+		sourceColumn: UnitPrice
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column DiscountAmount
+		dataType: double
+		lineageTag: 2e374531-11a6-44c8-ae2c-4fb925b1d68a
+		summarizeBy: sum
+		sourceColumn: DiscountAmount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Net Price'
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: db3d1efb-2c2a-489e-ad30-809c57b6eeb7
+		summarizeBy: sum
+		sourceColumn: Net Price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column Time
+		dataType: dateTime
+		formatString: Long Time
+		lineageTag: a8e6a67f-0211-42c4-92e9-1ad1ca99a4a1
+		summarizeBy: none
+		sourceColumn: Time
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Sales = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(Server, DB),
+				     dbo_FactInternetSales = Source{[Schema="dbo",Item="FactInternetSales"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(dbo_FactInternetSales,{"SalesOrderNumber", "SalesOrderLineNumber", "OrderDate", "DueDate", "ShipDate", "ProductKey", "CustomerKey", "PromotionKey", "SalesTerritoryKey", "OrderQuantity", "UnitPrice", "DiscountAmount", "TotalProductCost", "SalesAmount", "TaxAmt", "Freight"}),
+				    #"Added Net Price" = Table.AddColumn(#"Removed Other Columns", "Net Price", each ([SalesAmount] - [DiscountAmount]) / [OrderQuantity]),
+				    #"Filtered Rows" = Table.SelectRows(#"Added Net Price", each [OrderDate] >= RangeStart and [OrderDate] < RangeEnd),
+				    #"Added Custom" = Table.AddColumn(#"Filtered Rows", "YearCol", each Date.Year([OrderDate])),
+				    #"Duplicated Column" = Table.DuplicateColumn(#"Added Custom", "OrderDate", "OrderDate - Copy"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Duplicated Column",{{"OrderDate - Copy", "Time"}}),
+				    #"Reordered Columns" = Table.ReorderColumns(#"Renamed Columns",{"SalesOrderNumber", "SalesOrderLineNumber", "OrderDate", "Time", "DueDate", "ShipDate", "ProductKey", "CustomerKey", "PromotionKey", "SalesTerritoryKey", "OrderQuantity", "UnitPrice", "DiscountAmount", "TotalProductCost", "SalesAmount", "TaxAmt", "Freight", "Net Price", "YearCol"}),
+				    #"Changed Net Price Type" = Table.TransformColumnTypes(#"Reordered Columns",{{"Net Price", Currency.Type}})
+				in
+				    #"Changed Net Price Type"
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

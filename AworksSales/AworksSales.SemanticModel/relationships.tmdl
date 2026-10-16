@@ -1,0 +1,38 @@
+relationship AutoDetected_9eaebebd-604c-47bd-890e-36a632ca8faf
+	fromColumn: Sales.CustomerKey
+	toColumn: Customer.CustomerKey
+
+relationship AutoDetected_7cd34503-837a-4ff3-9e0b-a0515be8a4c1
+	fromColumn: Sales.ProductKey
+	toColumn: Product.ProductKey
+
+relationship AutoDetected_6024e486-bce0-4681-a7c4-1e034cc32603
+	fromColumn: Sales.SalesTerritoryKey
+	toColumn: SalesTerritory.SalesTerritoryKey
+
+relationship AutoDetected_cc31e41e-53a6-4d47-b46e-cc3dd67626a5
+	fromColumn: Sales.PromotionKey
+	toColumn: Promotion.PromotionKey
+
+relationship a7e3271a-ff9c-2886-bdda-b0b97f9e1adf
+	isActive: false
+	fromColumn: Sales.DueDate
+	toColumn: Date.Date
+
+relationship 2ceaa449-432f-c08a-cb34-199edce7bb19
+	isActive: false
+	fromColumn: Sales.ShipDate
+	toColumn: Date.Date
+
+relationship AutoDetected_6159e855-ba0f-4630-8605-3c1b1c8517e3
+	fromColumn: ProductInventory.ProductKey
+	toColumn: Product.ProductKey
+
+relationship 27edddfb-0484-49db-495a-752e89ca89cb
+	fromColumn: ProductInventory.MovementDate
+	toColumn: Date.Date
+
+relationship 41fc5068-deb0-0a3f-2775-10af4197e1cd
+	fromColumn: Sales.OrderDate
+	toColumn: Date.Date
+

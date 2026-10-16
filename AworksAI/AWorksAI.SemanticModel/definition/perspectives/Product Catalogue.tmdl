@@ -1,0 +1,63 @@
+/// For product managers and category analysts. Focused on product attributes, pricing, cost, margins and category hierarchy.
+perspective 'Product Catalogue'
+
+	perspectiveTable Product
+
+		perspectiveColumn 'Product Name'
+
+		perspectiveColumn Color
+
+		perspectiveColumn Cost
+
+		perspectiveColumn Price
+
+		perspectiveColumn Margin
+
+		perspectiveColumn Subcategory
+
+		perspectiveColumn Category
+
+		perspectiveColumn 'Price Band'
+
+		perspectiveColumn 'Cost Tier'
+
+		perspectiveColumn 'Price Tier'
+
+		perspectiveHierarchy 'Product Category'
+
+	perspectiveTable Sales
+
+		perspectiveColumn 'Sales Amount'
+
+		perspectiveColumn 'Order Quantity'
+
+		perspectiveColumn 'Product Cost'
+
+		perspectiveColumn 'Sales Amount Tier'
+
+	perspectiveTable 'Base Measures'
+
+		perspectiveMeasure 'Total Sales Amount'
+
+		perspectiveMeasure 'Total Order Quantity'
+
+		perspectiveMeasure 'Avg Order Quantity'
+
+		perspectiveMeasure 'Total Product Cost'
+
+		perspectiveMeasure 'Avg Product Cost'
+
+		perspectiveMeasure 'Min Product Cost'
+
+		perspectiveMeasure 'Max Product Cost'
+
+		perspectiveMeasure 'Gross Profit'
+
+		perspectiveMeasure 'Gross Profit Margin %'
+
+		perspectiveMeasure 'Revenue per Unit'
+
+		perspectiveMeasure 'Total Discount Amount'
+
+		perspectiveMeasure 'Discount %'
+

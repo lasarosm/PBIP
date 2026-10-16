@@ -1,0 +1,89 @@
+/// For sales analysts and report authors. Focused on transaction-level sales data, revenue metrics and date filtering.
+perspective 'Sales Analysis'
+
+	perspectiveTable Sales
+
+		perspectiveColumn 'Sales Amount'
+
+		perspectiveColumn 'Order Quantity'
+
+		perspectiveColumn 'Product Cost'
+
+		perspectiveColumn 'Discount Amount'
+
+		perspectiveColumn 'Tax Amount'
+
+		perspectiveColumn Freight
+
+		perspectiveColumn 'Order Date'
+
+		perspectiveColumn 'Ship Date'
+
+		perspectiveColumn 'Due Date'
+
+		perspectiveColumn 'Order Hour'
+
+		perspectiveColumn 'Time of Day'
+
+		perspectiveColumn 'Sales Amount Tier'
+
+	perspectiveTable Date
+
+		perspectiveColumn Date
+
+		perspectiveColumn Year
+
+		perspectiveColumn Quarter
+
+		perspectiveColumn Month
+
+		perspectiveColumn 'Month Number'
+
+		perspectiveColumn 'Day Name'
+
+		perspectiveColumn 'Year Month'
+
+		perspectiveColumn 'Is Weekend'
+
+		perspectiveColumn 'Half Year'
+
+		perspectiveHierarchy Calendar
+
+		perspectiveHierarchy 'Week Pattern'
+
+	perspectiveTable 'Base Measures'
+
+		perspectiveMeasure 'Total Sales Amount'
+
+		perspectiveMeasure 'Avg Sales Amount'
+
+		perspectiveMeasure 'Min Sales Amount'
+
+		perspectiveMeasure 'Max Sales Amount'
+
+		perspectiveMeasure 'Sales Count'
+
+		perspectiveMeasure 'Total Order Quantity'
+
+		perspectiveMeasure 'Avg Order Quantity'
+
+		perspectiveMeasure 'Total Product Cost'
+
+		perspectiveMeasure 'Total Discount Amount'
+
+		perspectiveMeasure 'Discount %'
+
+		perspectiveMeasure 'Total Tax Amount'
+
+		perspectiveMeasure 'Total Freight'
+
+		perspectiveMeasure 'Freight %'
+
+		perspectiveMeasure 'Gross Profit'
+
+		perspectiveMeasure 'Gross Profit Margin %'
+
+		perspectiveMeasure 'Net Sales Amount'
+
+		perspectiveMeasure 'Revenue per Unit'
+

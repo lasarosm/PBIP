@@ -1,0 +1,80 @@
+table Product
+	lineageTag: 2042763a-ad9e-4346-9e01-7c1c80701228
+
+	column ProductKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 0d823761-c775-4083-a0a9-50fbc0ac6213
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product
+		dataType: string
+		lineageTag: 15f52fb4-896a-4557-907c-e70e8a9895ac
+		summarizeBy: none
+		sourceColumn: Product
+
+		annotation SummarizationSetBy = Automatic
+
+	column Color
+		dataType: string
+		lineageTag: b6a70fed-074f-4475-a7d4-c64e533b6cfe
+		summarizeBy: none
+		sourceColumn: Color
+
+		annotation SummarizationSetBy = Automatic
+
+	column ListPrice
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 51c880c5-09ed-48dd-a47d-f2d985eaaed5
+		summarizeBy: none
+		sourceColumn: ListPrice
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column ProductLine
+		dataType: string
+		lineageTag: e7b35c32-646a-4008-9e1e-d85b85b4ae10
+		summarizeBy: none
+		sourceColumn: ProductLine
+
+		annotation SummarizationSetBy = Automatic
+
+	column Subcategory
+		dataType: string
+		lineageTag: 31907ab1-73af-43fb-af3f-753180c9d8b8
+		summarizeBy: none
+		sourceColumn: Subcategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 9ace4ec2-d9e8-4cda-b3e5-38552b584563
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Product = m
+		mode: import
+		source =
+				let
+				  Source = Sql.Database("lmc.database.windows.net", "AdventureWorksDW2024" ),
+				  #"Navigation 1" = Source{[Schema = "dbo", Item = "DimProduct"]}[Data],
+				  #"Expanded DimProductSubcategory" = Table.ExpandRecordColumn(#"Navigation 1", "DimProductSubcategory", {"EnglishProductSubcategoryName", "DimProductCategory"}, {"EnglishProductSubcategoryName", "DimProductCategory"}),
+				  #"Expanded DimProductCategory" = Table.ExpandRecordColumn(#"Expanded DimProductSubcategory", "DimProductCategory", {"EnglishProductCategoryName"}, {"EnglishProductCategoryName"}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Expanded DimProductCategory", {"ProductKey", "EnglishProductName", "Color", "ListPrice", "ProductLine", "EnglishProductSubcategoryName", "EnglishProductCategoryName"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns", {{"EnglishProductName", "Product"}, {"EnglishProductCategoryName", "Category"}, {"EnglishProductSubcategoryName", "Subcategory"}})
+				in
+				  #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

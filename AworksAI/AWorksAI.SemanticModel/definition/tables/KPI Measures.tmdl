@@ -1,0 +1,290 @@
+/// KPI measure group containing targets/goals, trend analysis, and variance measures for executive dashboards and performance monitoring.
+table 'KPI Measures'
+	lineageTag: 595dc4b8-4a90-4b7d-bad6-ed293aca7b60
+
+	/// Monthly revenue target based on a 10% growth uplift over the prior year same month. Falls back to $1,060,000 when no prior year data is available — derived from the 23-month average of actual sales.
+	measure 'Revenue Target' =
+			VAR _PY = CALCULATE([Total Sales Amount], SAMEPERIODLASTYEAR('Date'[Date]))
+			RETURN
+			    IF(ISBLANK(_PY), 1060000, _PY * 1.10)
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Targets & Goals
+		lineageTag: 9bdf24a7-f385-4818-8969-fe9fd1b78b77
+
+	/// Monthly gross profit target set at 32% of the Revenue Target. The model currently delivers a stable 30% GPM — this target reflects a 2-point improvement goal.
+	measure 'Gross Profit Target' = CALCULATE([Revenue Target]) * 0.32
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Targets & Goals
+		lineageTag: d06f97a1-9b0e-4152-a68a-37dc25aac2e0
+
+	/// Monthly transaction volume target. Set at 10% growth over the prior year same month, defaulting to 210 transactions when no PY data is available — the 23-month average.
+	measure 'Transactions Target' =
+			VAR _PY = CALCULATE([Sales Count], SAMEPERIODLASTYEAR('Date'[Date]))
+			RETURN
+			    IF(ISBLANK(_PY), 210, _PY * 1.10)
+		formatString: #,0
+		displayFolder: Targets & Goals
+		lineageTag: 66ba7c3b-d480-45d3-963a-70d9d9f83d56
+
+	/// Monthly units sold target. Set at 10% growth over the prior year same month, defaulting to 420 units when no PY data is available — the 23-month average.
+	measure 'Units Target' =
+			VAR _PY = CALCULATE([Total Order Quantity], SAMEPERIODLASTYEAR('Date'[Date]))
+			RETURN
+			    IF(ISBLANK(_PY), 420, _PY * 1.10)
+		formatString: #,0
+		displayFolder: Targets & Goals
+		lineageTag: 2df16105-57bc-4abc-9898-7f0a784f0249
+
+	/// Gross profit margin target of 32%. The model currently holds a stable 30% GPM — this 2-point target reflects a cost efficiency or mix improvement goal.
+	measure 'GPM Target' = 0.32
+		formatString: 0.00%
+		displayFolder: Targets & Goals
+		lineageTag: f9fb1d77-b34e-4c5f-adcb-a2af42203399
+
+	/// Discount rate ceiling target of 5%. Discounts above this threshold may indicate excessive promotional activity eroding margin.
+	measure 'Discount % Target' = 0.05
+		formatString: 0.00%
+		displayFolder: Targets & Goals
+		lineageTag: bcfc2b06-773a-4251-9447-f890911a8751
+
+	/// Freight cost ceiling target of 3% of revenue. Values above this indicate rising logistics costs relative to sales.
+	measure 'Freight % Target' = 0.03
+		formatString: 0.00%
+		displayFolder: Targets & Goals
+		lineageTag: 0811f4c7-dbb2-4cd5-ac0f-655eb2ee2c7d
+
+	/// Revenue target for the full year-to-date period. Scales the monthly Revenue Target by accumulating it across all months in the current YTD window.
+	measure 'Revenue Target YTD' =
+			CALCULATE(
+			    SUMX(
+			        VALUES('Date'[Year Month]),
+			        [Revenue Target]
+			    ),
+			    DATESYTD('Date'[Date])
+			)
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Targets & Goals
+		lineageTag: cde49349-291a-4889-9655-ba130642aeb9
+
+	/// Gross profit target for the full year-to-date period.
+	measure 'Gross Profit Target YTD' =
+			CALCULATE(
+			    SUMX(
+			        VALUES('Date'[Year Month]),
+			        [Gross Profit Target]
+			    ),
+			    DATESYTD('Date'[Date])
+			)
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Targets & Goals
+		lineageTag: 687a6bc8-0727-446c-9b6c-b4e8ee547ea8
+
+	/// Revenue target attainment expressed as a percentage. 100% means on target; above 100% means outperforming; below 100% means behind target. Use as the primary KPI gauge value.
+	measure 'Revenue Attainment %' = DIVIDE([Total Sales Amount], [Revenue Target])
+		formatString: 0.0%
+		displayFolder: Targets & Goals
+		lineageTag: 720416e6-f545-427b-b1ac-9e50bcd6f23e
+
+	/// Revenue for the same month in the prior year. Foundation for all YoY comparisons.
+	measure 'Revenue PY' = CALCULATE([Total Sales Amount], SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Trends
+		lineageTag: 5b06c5c4-e9c3-4858-8547-af06564085d4
+
+	/// Gross profit for the same month in the prior year.
+	measure 'Gross Profit PY' = CALCULATE([Gross Profit], SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Trends
+		lineageTag: 120fdb33-23ab-4113-b846-a46a57d2e62e
+
+	/// Transaction count for the same month in the prior year.
+	measure 'Transactions PY' = CALCULATE([Sales Count], SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: #,0
+		displayFolder: Trends
+		lineageTag: 24096225-b533-4448-b119-6d99aa4735ff
+
+	/// Units sold for the same month in the prior year.
+	measure 'Units PY' = CALCULATE([Total Order Quantity], SAMEPERIODLASTYEAR('Date'[Date]))
+		formatString: #,0
+		displayFolder: Trends
+		lineageTag: ec02cee6-3f56-4835-bf80-59c88c12dc82
+
+	/// Cumulative revenue from the start of the current year to the last date in context.
+	measure 'Revenue YTD' = CALCULATE([Total Sales Amount], DATESYTD('Date'[Date]))
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Trends
+		lineageTag: 2a2a564a-c902-42f7-ac8b-c37d5886f2d3
+
+	/// Cumulative gross profit from the start of the current year to the last date in context.
+	measure 'Gross Profit YTD' = CALCULATE([Gross Profit], DATESYTD('Date'[Date]))
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Trends
+		lineageTag: 5f726a5c-8eea-4cd4-831f-d80364ef1d86
+
+	/// Cumulative revenue for the same year-to-date window in the prior year. Use alongside Revenue YTD for YTD growth comparisons.
+	measure 'Revenue YTD PY' = CALCULATE([Total Sales Amount], DATESYTD(SAMEPERIODLASTYEAR('Date'[Date])))
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Trends
+		lineageTag: 15eab16e-b7e5-4e26-9483-2c3847fe932f
+
+	/// 3-month simple moving average of revenue. Smooths short-term volatility to reveal the underlying revenue trend.
+	measure 'Revenue 3M Avg' =
+			VAR _3M =
+			    CALCULATE(
+			        [Total Sales Amount],
+			        DATESINPERIOD('Date'[Date], LASTDATE('Date'[Date]), -3, MONTH)
+			    )
+			VAR _count =
+			    CALCULATE(
+			        DISTINCTCOUNT('Date'[Year Month]),
+			        DATESINPERIOD('Date'[Date], LASTDATE('Date'[Date]), -3, MONTH)
+			    )
+			RETURN
+			    DIVIDE(_3M, _count)
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Trends
+		lineageTag: bf682125-a54e-4357-b752-d99a199f675a
+
+	/// Rolling 12-month revenue total. Eliminates seasonal distortion and shows the annualised revenue run-rate at any point in time.
+	measure 'Revenue Rolling 12M' =
+			CALCULATE(
+			    [Total Sales Amount],
+			    DATESINPERIOD('Date'[Date], LASTDATE('Date'[Date]), -12, MONTH)
+			)
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Trends
+		lineageTag: ff79759e-997d-49b6-b4f2-247b219f0348
+
+	/// Month-over-month revenue growth rate. Positive values indicate growth; negative values indicate contraction versus the immediate prior month.
+	measure 'Revenue MoM %' =
+			VAR _curr = [Total Sales Amount]
+			VAR _prev =
+			    CALCULATE(
+			        [Total Sales Amount],
+			        DATEADD('Date'[Date], -1, MONTH)
+			    )
+			RETURN
+			    DIVIDE(_curr - _prev, _prev)
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Trends
+		lineageTag: 25957529-50e3-43e5-8927-f3e834c2044f
+
+	/// Gross profit margin trend: current GPM minus prior year GPM. Positive values indicate margin expansion; negative values indicate compression.
+	measure 'GPM Trend (vs PY)' =
+			VAR _curr = [Gross Profit Margin %]
+			VAR _py   = CALCULATE([Gross Profit Margin %], SAMEPERIODLASTYEAR('Date'[Date]))
+			RETURN
+			    _curr - _py
+		formatString: +0.00%;-0.00%;0.00%
+		displayFolder: Trends
+		lineageTag: 96eb7bf9-89d7-4a12-b88c-7bd1fb7f2e5b
+
+	/// Revenue per transaction trend vs prior year. Tracks whether average order value is growing or shrinking over time.
+	measure 'Avg Order Value Trend' =
+			VAR _curr = DIVIDE([Total Sales Amount], [Sales Count])
+			VAR _py   = DIVIDE(
+			    CALCULATE([Total Sales Amount], SAMEPERIODLASTYEAR('Date'[Date])),
+			    CALCULATE([Sales Count],        SAMEPERIODLASTYEAR('Date'[Date]))
+			)
+			RETURN
+			    _curr - _py
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Trends
+		lineageTag: c2dc232b-7edf-4e2e-9820-660876a81cc1
+
+	/// Absolute revenue variance vs target. Positive = outperforming target; negative = behind target. Pair with Revenue Attainment % for full picture.
+	measure 'Revenue vs Target' = [Total Sales Amount] - [Revenue Target]
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Variance Analysis
+		lineageTag: 703557c8-2c86-4beb-9dec-ee1b2891d62a
+
+	/// Revenue variance vs prior year same period in absolute dollars.
+	measure 'Revenue vs PY' = [Total Sales Amount] - [Revenue PY]
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Variance Analysis
+		lineageTag: 18401367-32de-45ac-871c-b4cb8a23d5ff
+
+	/// Year-over-year revenue growth rate. Positive = growth; negative = decline. The primary executive KPI for revenue health.
+	measure 'Revenue YoY %' = DIVIDE([Revenue vs PY], [Revenue PY])
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Variance Analysis
+		lineageTag: 99af7cda-a6f3-4fb8-af24-bfc956f23a07
+
+	/// YTD revenue variance vs target. Shows cumulative performance against the year-to-date target accumulation.
+	measure 'Revenue YTD vs Target' = [Revenue YTD] - [Revenue Target YTD]
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Variance Analysis
+		lineageTag: dc55c77e-0ecb-46ae-9f36-17980e5ee952
+
+	/// YTD revenue variance vs prior year same YTD window.
+	measure 'Revenue YTD vs PY' = [Revenue YTD] - [Revenue YTD PY]
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Variance Analysis
+		lineageTag: e20bf88e-10f8-4a3f-8729-cefc33f73c12
+
+	/// Absolute gross profit variance vs target. Tracks whether profitability improvement goals are being met.
+	measure 'Gross Profit vs Target' = [Gross Profit] - [Gross Profit Target]
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Variance Analysis
+		lineageTag: 8fbda583-f428-4d0e-b88b-6cca2fb0313b
+
+	/// Absolute gross profit variance vs prior year.
+	measure 'Gross Profit vs PY' = [Gross Profit] - [Gross Profit PY]
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Variance Analysis
+		lineageTag: 0cecef2f-5970-4d39-9168-51e218bf2b05
+
+	/// Gross profit margin variance vs the 32% GPM target. Positive = better than target; negative = below target.
+	measure 'GPM vs Target' = [Gross Profit Margin %] - [GPM Target]
+		formatString: +0.00%;-0.00%;0.00%
+		displayFolder: Variance Analysis
+		lineageTag: d0466f4e-4acb-46a3-a8d5-77e587b8464e
+
+	/// Transaction volume variance vs target. Shows whether sales activity levels are meeting growth goals.
+	measure 'Transactions vs Target' = [Sales Count] - [Transactions Target]
+		formatString: +#,0;-#,0;0
+		displayFolder: Variance Analysis
+		lineageTag: ea6f326f-6945-4b3c-a4b7-32f0bec1fafb
+
+	/// Transaction volume variance vs prior year.
+	measure 'Transactions vs PY' = [Sales Count] - [Transactions PY]
+		formatString: +#,0;-#,0;0
+		displayFolder: Variance Analysis
+		lineageTag: d2984eb4-acfa-4a06-8e1c-ccb0e0f68f5c
+
+	/// Discount rate variance vs the 5% ceiling target. Positive values indicate discounting is under control; negative values flag excessive promotional spend.
+	measure 'Discount % vs Target' = [Discount % Target] - [Discount %]
+		formatString: +0.00%;-0.00%;0.00%
+		displayFolder: Variance Analysis
+		lineageTag: 7de5d639-6910-4a45-a446-4761e0add4e7
+
+	/// Freight cost rate variance vs the 3% ceiling target. Positive = freight is under control; negative = logistics costs are exceeding target.
+	measure 'Freight % vs Target' = [Freight % Target] - [Freight %]
+		formatString: +0.00%;-0.00%;0.00%
+		displayFolder: Variance Analysis
+		lineageTag: c1f8577c-7bbc-49fe-9a72-38ea776d61a7
+
+	/// KPI status indicator returning a single word for conditional formatting, icon sets, and dashboard RAG status. Returns On Target (attainment ≥ 95%), At Risk (80–95%), or Off Target (< 80%). Use with icon set or background colour conditional formatting rules.
+	measure 'KPI Status' =
+			VAR _att = [Revenue Attainment %]
+			RETURN
+			    SWITCH(
+			        TRUE(),
+			        ISBLANK(_att),          BLANK(),
+			        _att >= 0.95,           "On Target",
+			        _att >= 0.80,           "At Risk",
+			        "Off Target"
+			    )
+		displayFolder: Variance Analysis
+		lineageTag: 9a6ce71a-2b1d-47f3-958b-fae7694504f9
+
+	column Dummy
+		isHidden
+		lineageTag: 36e3ba50-1469-4967-83c1-60bd587f5afc
+		isNameInferred
+		sourceColumn: [Dummy]
+
+	partition 'KPI Measures' = calculated
+		mode: import
+		source = ROW("Dummy", BLANK())
+

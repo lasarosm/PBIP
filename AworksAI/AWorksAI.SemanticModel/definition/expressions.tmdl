@@ -1,0 +1,32 @@
+expression Server = "lmc.database.windows.net" meta [IsParameterQuery=true, List={"Athens", "lmc.database.windows.net"}, DefaultValue="Athens", Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 324179a3-22ac-4ec3-a7b8-6574bd6957d5
+	queryGroup: Parameters
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+
+expression Database = "AdventureworksDW2024" meta [IsParameterQuery=true, List={"AdventureworksDW2016", "AdventureworksDW2022", "AdventureworksDW2024"}, DefaultValue="AdventureworksDW2016", Type="Text", IsParameterQueryRequired=true]
+	lineageTag: b7604458-f726-4a74-8c80-5d0654c4621f
+	queryGroup: Parameters
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+
+expression RangeStart = #datetime(2023, 6, 22, 0, 0, 0) meta [IsParameterQuery=true, Type="DateTime", IsParameterQueryRequired=true]
+	lineageTag: 5352315e-fcbe-4560-9de5-a74ea144d430
+	queryGroup: Parameters
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = DateTime
+
+expression RangeEnd = #datetime(2026, 6, 22, 0, 0, 0) meta [IsParameterQuery=true, Type="DateTime", IsParameterQueryRequired=true]
+	lineageTag: 433840d1-a4cb-4a1c-98ce-a28553e53dda
+	queryGroup: Parameters
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = DateTime
+

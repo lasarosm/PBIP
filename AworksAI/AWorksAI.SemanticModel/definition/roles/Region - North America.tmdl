@@ -1,0 +1,8 @@
+/// Restricts data access to North American customers only (United States and Canada). Assign to users or groups who should only see sales, customer and related data for the North America region.
+role 'Region - North America'
+	modelPermission: read
+
+	tablePermission Customer = [Country] IN {"United States", "Canada"}
+
+	annotation PBI_Id = 4bdba02fd1034ec48c6c9dc2a89c6537
+

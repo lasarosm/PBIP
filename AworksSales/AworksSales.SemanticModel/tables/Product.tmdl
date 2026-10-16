@@ -1,0 +1,144 @@
+table Product
+	lineageTag: 2752ade4-d5e1-4a96-a282-be916a607bcb
+
+	column ProductKey
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		lineageTag: c6fda665-854d-42d1-a6e6-fb2cafb7a747
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Product
+		dataType: string
+		isHidden
+		lineageTag: 0fa49d05-a68f-41ef-90c9-374bc1eba5f4
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Product
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Color
+		dataType: string
+		displayFolder: Details
+		lineageTag: 04553253-c4f4-4a85-98e6-fa0080bf612f
+		summarizeBy: none
+		sourceColumn: Color
+
+		annotation SummarizationSetBy = Automatic
+
+	column ListPrice
+		dataType: double
+		formatString: #,##0.00
+		displayFolder: Details
+		lineageTag: 698b4ef2-544b-4561-85d9-37a88edd689b
+		summarizeBy: sum
+		sourceColumn: ListPrice
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ProductLine
+		dataType: string
+		isHidden
+		lineageTag: ccebcff1-e045-4a25-86fd-8f693b5c4cd0
+		summarizeBy: none
+		sourceColumn: ProductLine
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ModelName
+		dataType: string
+		isHidden
+		lineageTag: d8a39eda-a92c-4e94-875b-f6da54e062c5
+		summarizeBy: none
+		sourceColumn: ModelName
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Subcategory
+		dataType: string
+		isHidden
+		lineageTag: ada4e500-6e36-4722-ab18-e98a960df653
+		summarizeBy: none
+		sourceColumn: Subcategory
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		isHidden
+		lineageTag: 519bb766-0a64-4f6a-a2c8-80f3a3e45483
+		summarizeBy: none
+		sourceColumn: Category
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy Products
+		lineageTag: bd481f77-be6a-42e3-b12a-378cae61dc7b
+
+		level Category
+			lineageTag: 1ef54f04-c1c6-4ebf-a037-7553966ada1f
+			column: Category
+
+		level Subcategory
+			lineageTag: 3a5de7b7-cc08-43fc-b3ee-a9f98a793c87
+			column: Subcategory
+
+		level Product
+			lineageTag: a9b3e760-5b88-4909-9b93-0bb5c114b412
+			column: Product
+
+	hierarchy ProductLines
+		lineageTag: 52700f87-71d3-4cb5-ae68-ff7d353d01f5
+
+		level ProductLine
+			lineageTag: bc016826-b7d3-48f2-8b65-e67df5936444
+			column: ProductLine
+
+		level ModelName
+			lineageTag: e5a27571-6189-4d70-815c-470f3da67509
+			column: ModelName
+
+		level Product
+			lineageTag: a6baf8e6-84b5-4b3a-ac56-40a68b34b279
+			column: Product
+
+	partition Product = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(Server, DB),
+				     dbo_DimProduct = Source{[Schema="dbo",Item="DimProduct"]}[Data],
+				    #"Expanded DimProductSubcategory" = Table.ExpandRecordColumn(dbo_DimProduct, "DimProductSubcategory", {"EnglishProductSubcategoryName", "DimProductCategory"}, {"EnglishProductSubcategoryName", "DimProductCategory"}),
+				    #"Expanded DimProductCategory" = Table.ExpandRecordColumn(#"Expanded DimProductSubcategory", "DimProductCategory", {"EnglishProductCategoryName"}, {"EnglishProductCategoryName"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Expanded DimProductCategory",{{"EnglishProductCategoryName", "Category"}, {"EnglishProductSubcategoryName", "Subcategory"}}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Renamed Columns",{"ProductKey", "EnglishProductName", "Color", "ListPrice", "ProductLine", "ModelName", "Subcategory", "Category"}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Removed Other Columns",{{"EnglishProductName", "Product"}}),
+				    #"Replaced Value" = Table.ReplaceValue(#"Renamed Columns1",null,0,Replacer.ReplaceValue,{"ListPrice"}),
+				    #"Replaced Value1" = Table.ReplaceValue(#"Replaced Value",null,"N/A",Replacer.ReplaceValue,{"ProductLine", "ModelName"}),
+				    #"Replaced Value2" = Table.ReplaceValue(#"Replaced Value1",null,"Uncategorized",Replacer.ReplaceValue,{"Subcategory", "Category"})
+				in
+				    #"Replaced Value2"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

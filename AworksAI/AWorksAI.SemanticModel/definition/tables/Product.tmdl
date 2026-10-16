@@ -1,0 +1,222 @@
+/// Dimension table containing product attributes, pricing, and category hierarchy. One row per product.
+table Product
+	lineageTag: f2f7b566-f319-4528-9101-e28297327c57
+
+	/// Unique identifier for each product
+	column 'Product ID'
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		lineageTag: fe8dc37e-d9b5-4a8b-a405-bd2f70a448f5
+		summarizeBy: none
+		sourceColumn: Product ID
+
+		annotation Synonyms = item id|sku|article number|product key
+
+	/// Full descriptive name of the product
+	column 'Product Name'
+		dataType: string
+		isHidden
+		displayFolder: Product Details
+		lineageTag: abd6d5df-7da2-4509-8137-3a3e689b490e
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Product Name
+
+		annotation Synonyms = item|article|goods|merchandise|product title|item name
+
+	/// Colour of the product
+	column Color
+		dataType: string
+		displayFolder: Product Details
+		lineageTag: 7d8e21d7-808f-4fbc-8030-2c2760fd2685
+		summarizeBy: none
+		sourceColumn: Color
+
+		annotation Synonyms = colour|shade|hue|finish
+
+	/// Standard manufacturing or procurement cost of the product
+	column Cost
+		dataType: double
+		formatString: #,0.00
+		displayFolder: Pricing
+		lineageTag: 5c3d1a6b-286f-4669-ba77-25d26ad14546
+		summarizeBy: none
+		sourceColumn: Cost
+
+		annotation Synonyms = standard cost|unit cost|cogs|cost of goods|manufacturing cost
+
+	/// Recommended retail price of the product
+	column Price
+		dataType: double
+		formatString: #,0.00
+		displayFolder: Pricing
+		lineageTag: 3ea6f667-5990-4977-a145-b5f57d643554
+		summarizeBy: none
+		sourceColumn: Price
+
+		annotation Synonyms = list price|unit price|retail price|selling price|rrp
+
+	/// Product subcategory grouping
+	column Subcategory
+		dataType: string
+		isHidden
+		displayFolder: Category
+		lineageTag: 35c69ea1-5a1e-40fe-a5b9-ab46c013e31a
+		summarizeBy: none
+		sourceColumn: Subcategory
+
+		annotation Synonyms = sub category|product group|item type|product type
+
+	/// Top-level product category grouping
+	column Category
+		dataType: string
+		isHidden
+		displayFolder: Category
+		lineageTag: 76cfdafa-0a86-4e63-bce5-dfccb9e811a3
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation Synonyms = product category|department|product line|division
+
+	/// Gross margin (Price minus Cost) per unit
+	column Margin
+		dataType: double
+		formatString: 0.00%
+		displayFolder: Pricing
+		lineageTag: 6b85ecf3-61d8-48b4-9036-e9fc717e0f9c
+		summarizeBy: none
+		sourceColumn: Margin
+
+		annotation Synonyms = profit|unit margin|markup|gross margin|profit per unit
+
+	/// Price band grouping: Low (under 50), Medium (50–200), High (200+)
+	column 'Price Band'
+		dataType: string
+		displayFolder: Pricing
+		lineageTag: 456cf59c-e6de-4a80-b5c2-00bca6aaa4a6
+		summarizeBy: none
+		sourceColumn: Price Band
+
+		annotation Synonyms = price range|price tier|price segment|cost band|price level
+
+	/// Data quality indicator — flags invalid prices or costs
+	column 'Data Quality Flag'
+		dataType: string
+		displayFolder: Data Quality
+		lineageTag: 65e6637d-b2a3-4d0c-9147-8c6c110bc668
+		summarizeBy: none
+		sourceColumn: Data Quality Flag
+
+		annotation Synonyms = dq flag|quality check|data issue|data alert
+
+	/// Product cost grouped into low, medium and high cost tiers for margin analysis
+	column 'Cost Tier' = SWITCH(TRUE(), Product[Cost] < 50, "Low Cost (< 50)", Product[Cost] < 200, "Mid Cost (50–200)", Product[Cost] < 500, "High Cost (200–500)", "Premium Cost (500+)")
+		dataType: string
+		displayFolder: Groups & Bins
+		lineageTag: f17ca202-fbbe-458d-a902-a58c8136765b
+
+	/// Product price grouped into tiers for pricing strategy analysis
+	column 'Price Tier' = SWITCH(TRUE(), Product[Price] < 50, "Budget (< 50)", Product[Price] < 200, "Mid-Range (50–200)", Product[Price] < 500, "Premium (200–500)", "Luxury (500+)")
+		dataType: string
+		displayFolder: Groups & Bins
+		lineageTag: 2cf1a4ca-b057-4282-898a-46683f7abc69
+
+	/// Product catalogue drill-down from top-level category to individual product. Use for category performance analysis.
+	hierarchy 'Product Category'
+		displayFolder: Hierarchies
+		lineageTag: f2de2703-b9e8-4d9f-b797-df56a3e31874
+
+		level Category
+			lineageTag: 26bdcc6c-bbcc-4534-9302-bfcd8df195b0
+			column: Category
+
+		level Subcategory
+			lineageTag: 3ad5fe39-dc48-4bf5-a940-5045d1205d40
+			column: Subcategory
+
+		level 'Product Name'
+			lineageTag: a17fe2e9-3d4b-47c9-b66d-7cfc4bb791ff
+			column: 'Product Name'
+
+	partition Product = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(Server, Database),
+				    DimProduct = Source{[Schema="dbo",Item="DimProduct"]}[Data],
+				    DimProductCategory = Source{[Schema="dbo",Item="DimProductCategory"]}[Data],
+				    DimProductSubcategory = Source{[Schema="dbo",Item="DimProductSubcategory"]}[Data],
+				
+				    // Select relevant columns
+				    SelectedColumns = Table.SelectColumns(DimProduct, {
+				        "ProductKey", "EnglishProductName", "Color",
+				        "StandardCost", "ListPrice", "ProductSubcategoryKey"
+				    }),
+				
+				    // Merge Subcategory
+				    MergeSubcategory = Table.NestedJoin(
+				        SelectedColumns, {"ProductSubcategoryKey"},
+				        DimProductSubcategory, {"ProductSubcategoryKey"},
+				        "Subcategory", JoinKind.LeftOuter
+				    ),
+				    ExpandSubcategory = Table.ExpandTableColumn(
+				        MergeSubcategory,
+				        "Subcategory",
+				        {"EnglishProductSubcategoryName", "ProductCategoryKey"},
+				        {"Subcategory", "CategoryKey"}
+				    ),
+				
+				    // Merge Category
+				    MergeCategory = Table.NestedJoin(
+				        ExpandSubcategory, {"CategoryKey"},
+				        DimProductCategory, {"ProductCategoryKey"},
+				        "Category", JoinKind.LeftOuter
+				    ),
+				    ExpandCategory = Table.ExpandTableColumn(
+				        MergeCategory,
+				        "Category",
+				        {"EnglishProductCategoryName"},
+				        {"Category"}
+				    ),
+				
+				    // Rename columns
+				    Renamed = Table.RenameColumns(ExpandCategory, {
+				        {"ProductKey", "Product ID"},
+				        {"EnglishProductName", "Product Name"},
+				        {"StandardCost", "Cost"},
+				        {"ListPrice", "Price"}
+				    }),
+				
+				    // Replace nulls
+				    ReplaceNulls = Table.ReplaceValue(Renamed, null, "Unknown", Replacer.ReplaceValue,
+				        {"Color", "Subcategory", "Category"}),
+				
+				    // Derived columns
+				    ProfitMargin = Table.AddColumn(ReplaceNulls, "Margin", each [Price] - [Cost], Currency.Type),
+				
+				    PriceBand = Table.AddColumn(ProfitMargin, "Price Band", each
+				        if [Price] < 50 then "Low"
+				        else if [Price] < 200 then "Medium"
+				        else "High"
+				    ),
+				
+				    // Data Quality Flag
+				    QualityFlag = Table.AddColumn(PriceBand, "Data Quality Flag", each
+				        if [Price] < 0 then "Invalid Price"
+				        else if [Cost] < 0 then "Invalid Cost"
+				        else "OK"
+				    ),
+				
+				    // Cleanup
+				    RemovedColumns = Table.RemoveColumns(QualityFlag, {"ProductSubcategoryKey", "CategoryKey"}),
+				    #"Changed Type" = Table.TransformColumnTypes(RemovedColumns,{{"Price Band", type text}, {"Data Quality Flag", type text}}),
+				
+				    #"Replaced Nulls from Cost" = Table.ReplaceValue(#"Changed Type",null,0,Replacer.ReplaceValue,{"Cost", "Price"}),
+				    #"Replaced nulls from Margin" = Table.ReplaceValue(#"Replaced Nulls from Cost",null,0,Replacer.ReplaceValue,{"Margin"})
+				in
+				    #"Replaced nulls from Margin"
+
+	annotation Synonyms = items|articles|goods|merchandise|products|catalogue|inventory
+

@@ -1,0 +1,33 @@
+// Welcome to DAX query view! Learn more about DAX queries at https://aka.ms/dax-queries.
+// Right-click on tables, columns, or measures in the data pane to access quick queries, or ask Copilot for help writing DAX.
+
+// Select "Run" to try this sample DAX query.
+EVALUATE
+     { MAX ('ProductInventory'[MovementDate]) }
+
+
+EVALUATE
+SELECTCOLUMNS (
+    FILTER (
+        'ProductInventory',
+        'ProductInventory'[MovementDate] = DATE(2024, 9, 16)
+    ),
+    "Product", 'ProductInventory'[MovementDate],
+    "Qty", 'ProductInventory'[UnitsBalance]
+)
+
+
+EVALUATE
+     { MAX ('Date'[Date]) }
+
+
+Evaluate 
+SELECTCOLUMNS (
+    FILTER (
+        'Date',
+        'Date'[Date] = DATE(2024, 9, 16)
+    ),
+    "Year", 'Date'[Year],
+    "Month", 'Date'[Month]
+)
+

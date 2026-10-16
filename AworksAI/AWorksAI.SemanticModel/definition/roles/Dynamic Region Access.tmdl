@@ -1,0 +1,18 @@
+/// Dynamic RLS role that resolves the current user's permitted region from the disconnected RLS User Map table using LOOKUPVALUE(). Europe users see Germany, United Kingdom and France. Australia users see Australia only. Users mapped to All see every country. Add new users by updating the RLS User Map table — no DAX changes needed.
+role 'Dynamic Region Access'
+	modelPermission: read
+
+	tablePermission Customer =
+			VAR _userUPN    = USERPRINCIPALNAME()
+			VAR _region    = LOOKUPVALUE('RLS User Map'[Region], 'RLS User Map'[UserUPN], _userUPN)
+			RETURN
+			    SWITCH(
+			        _region,
+			        "Europe",       [Country] IN {"Germany", "United Kingdom", "France"},
+			        "Australia",    [Country] = "Australia",
+			        "North America",[Country] IN {"United States", "Canada"},
+			        "All",          TRUE()
+			    )
+
+	annotation PBI_Id = 9ea5e9f3a804466eb17cb22cb50d6824
+

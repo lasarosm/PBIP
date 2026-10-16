@@ -1,0 +1,69 @@
+/// Placeholder table hosting the TI Patterns calculation group. Contains no data rows — it exists purely as a container for the 11 time-intelligence calculation items (Current, YTD, QTD, MTD, Prior Year, PY YTD, YoY Variance, YoY %, Prior Quarter, QoQ Variance, QoQ %). Use by dropping any Base Measure into a visual and slicing by the Name field of this table.
+table 'Calc Group'
+	lineageTag: 1aa2cd85-7e2f-4cf0-802e-a1bb2ac65e14
+
+	/// Calculation group applying time-intelligence patterns to any selected base measure. Slice by this group to see YTD, QTD, MTD, Prior Year, PY YTD, YoY and QoQ patterns automatically. Dynamic formatting via SELECTEDMEASUREFORMATSTRING() inherits each base measure's own format so currency, integer and percentage measures all display correctly without hardcoding.
+	calculationGroup
+		precedence: 10
+
+		/// Returns the base measure as-is with no time modification. Acts as the default passthrough so report authors can compare the current period alongside other time-intelligence items in the same visual.
+		calculationItem Current = SELECTEDMEASURE()
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Year-to-date: accumulates the selected measure from January 1st of the current year to the last date in context. DATESYTD expands the Date filter to cover all days from the start of the year, then CALCULATE re-evaluates the selected measure within that expanded window.
+		calculationItem YTD = CALCULATE(SELECTEDMEASURE(), DATESYTD('Date'[Date]))
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Quarter-to-date: accumulates the selected measure from the first day of the current quarter to the last date in context. DATESQTD resets at the start of each quarter, making this useful for within-quarter progress tracking.
+		calculationItem QTD = CALCULATE(SELECTEDMEASURE(), DATESQTD('Date'[Date]))
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Month-to-date: accumulates the selected measure from the 1st of the current month to the last date in context. DATESMTD resets at the start of each month, useful for tracking progress through the current month.
+		calculationItem MTD = CALCULATE(SELECTEDMEASURE(), DATESMTD('Date'[Date]))
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Returns the selected measure for the same period one year ago. SAMEPERIODLASTYEAR shifts the current date selection back exactly 12 months. Used as the baseline for year-over-year comparisons.
+		calculationItem 'Prior Year' = CALCULATE(SELECTEDMEASURE(), SAMEPERIODLASTYEAR('Date'[Date]))
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Prior year year-to-date: cumulative total for the same measure in the prior year up to the equivalent date. First applies DATESYTD to get the YTD window, then shifts it back 12 months with SAMEPERIODLASTYEAR. Enables a fair like-for-like YTD comparison between years.
+		calculationItem 'PY YTD' = CALCULATE(CALCULATE(SELECTEDMEASURE(), DATESYTD('Date'[Date])), SAMEPERIODLASTYEAR('Date'[Date]))
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Year-over-year absolute variance: difference between the current period and the same period last year. Positive means growth, negative means decline. Inherits the base measure format so currency shows as dollars, quantities as integers.
+		calculationItem 'YoY Variance' = SELECTEDMEASURE() - CALCULATE(SELECTEDMEASURE(), SAMEPERIODLASTYEAR('Date'[Date]))
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Year-over-year percentage change vs same period last year. Uses DIVIDE to safely return BLANK instead of an error when prior year is zero. Always formatted as a percentage regardless of the base measure format.
+		calculationItem 'YoY %' = DIVIDE(SELECTEDMEASURE() - CALCULATE(SELECTEDMEASURE(), SAMEPERIODLASTYEAR('Date'[Date])), CALCULATE(SELECTEDMEASURE(), SAMEPERIODLASTYEAR('Date'[Date])))
+
+			formatStringDefinition = "0.00%"
+
+		/// Returns the selected measure for the previous full quarter. PREVIOUSQUARTER returns all dates in the quarter immediately before the current one, providing the baseline for quarter-on-quarter analysis.
+		calculationItem 'Prior Quarter' = CALCULATE(SELECTEDMEASURE(), PREVIOUSQUARTER('Date'[Date]))
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Quarter-over-quarter absolute variance: difference between the current quarter and the previous quarter. Positive means improvement, negative means decline. Inherits the base measure format.
+		calculationItem 'QoQ Variance' = SELECTEDMEASURE() - CALCULATE(SELECTEDMEASURE(), PREVIOUSQUARTER('Date'[Date]))
+
+			formatStringDefinition = SELECTEDMEASUREFORMATSTRING()
+
+		/// Quarter-over-quarter percentage change vs the previous quarter. Uses DIVIDE to safely return BLANK when prior quarter is zero. Always formatted as a percentage.
+		calculationItem 'QoQ %' = DIVIDE(SELECTEDMEASURE() - CALCULATE(SELECTEDMEASURE(), PREVIOUSQUARTER('Date'[Date])), CALCULATE(SELECTEDMEASURE(), PREVIOUSQUARTER('Date'[Date])))
+
+			formatStringDefinition = "0.00%"
+
+	column 'TI Patterns'
+		dataType: string
+		lineageTag: 18a2db82-c66b-43b8-8112-0d730a804278
+
+	partition 'Partition_TI Patterns' = calculationGroup
+

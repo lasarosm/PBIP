@@ -1,0 +1,402 @@
+/// Fact table containing individual internet sales transactions. Each row represents one order line with amounts, quantities, costs, and date references.
+table Sales
+	isHidden
+	lineageTag: ba262a2b-bfe6-423e-96be-f752558ebf5b
+
+	refreshPolicy
+		policyType: basic
+		rollingWindowGranularity: year
+		rollingWindowPeriods: 3
+		incrementalGranularity: day
+		incrementalPeriods: 7
+		sourceExpression =
+			let
+			    // 1. Data Source (Dynamic parameters)
+			    Source = Sql.Database(Server, Database),
+			    FactInternetSales = Source{[Schema="dbo", Item="FactInternetSales"]}[Data],
+			
+			    // 2. Select only required columns early (CRITICAL for performance)
+			    SelectedColumns = Table.SelectColumns(FactInternetSales, {
+			        "ProductKey",
+			        "CustomerKey",
+			        "OrderDateKey",
+			        "ShipDateKey",
+			        "DueDateKey",
+			        "OrderDate",
+			        "ShipDate",
+			        "DueDate",
+			        "SalesAmount",
+			        "OrderQuantity",
+			        "TotalProductCost",
+			        "DiscountAmount",
+			        "TaxAmt",
+			        "Freight"
+			    }),
+			
+			    // INCREMENTAL REFRESH — filter on OrderDate using RangeStart/RangeEnd
+			    // Applied before any transforms to preserve query folding to SQL source
+			    FilteredByRange = Table.SelectRows(SelectedColumns, each
+			        [OrderDate] >= RangeStart and [OrderDate] < RangeEnd
+			    ),
+			
+			    // 3. Data Type Normalization (keep folding intact)
+			    RoundedNumerics = Table.TransformColumns(FilteredByRange, {
+			        {"SalesAmount", each Number.Round(_, 2), type number},
+			        {"TotalProductCost", each Number.Round(_, 2), type number},
+			        {"DiscountAmount", each Number.Round(_, 2), type number},
+			        {"TaxAmt", each Number.Round(_, 2), type number},
+			        {"Freight", each Number.Round(_, 2), type number}
+			    }),
+			
+			    // 4. Split datetime into Date + Time (hour-level granularity)
+			    AddOrderDate = Table.AddColumn(RoundedNumerics, "Order Date", each Date.From([OrderDate]), type date),
+			    AddOrderHour = Table.AddColumn(AddOrderDate, "Order Hour", each Time.Hour(Time.From([OrderDate])), Int64.Type),
+			
+			    AddShipDate = Table.AddColumn(AddOrderHour, "Ship Date", each Date.From([ShipDate]), type date),
+			    AddShipHour = Table.AddColumn(AddShipDate, "Ship Hour", each Time.Hour(Time.From([ShipDate])), Int64.Type),
+			
+			    AddDueDate = Table.AddColumn(AddShipHour, "Due Date", each Date.From([DueDate]), type date),
+			    AddDueHour = Table.AddColumn(AddDueDate, "Due Hour", each Time.Hour(Time.From([DueDate])), Int64.Type),
+			
+			    // 5. Data Quality Flags
+			    AddQualityFlag = Table.AddColumn(AddDueHour, "Data Quality Flag", each
+			        if [SalesAmount] < 0 then "Negative Sales"
+			        else if [OrderQuantity] = 0 then "Zero Quantity"
+			        else if [ProductKey] = null or [CustomerKey] = null then "Missing Keys"
+			        else "OK"
+			    ),
+			
+			    // 6. Remove original datetime columns (cardinality reduction)
+			    RemovedDateTime = Table.RemoveColumns(AddQualityFlag, {
+			        "OrderDate", "ShipDate", "DueDate"
+			    }),
+			
+			    // 7. Rename for model alignment (star schema friendly)
+			    RenamedColumns = Table.RenameColumns(RemovedDateTime, {
+			        {"ProductKey", "Product ID"},
+			        {"CustomerKey", "Customer ID"},
+			        {"OrderDateKey", "Order Date ID"},
+			        {"ShipDateKey", "Ship Date ID"},
+			        {"DueDateKey", "Due Date ID"},
+			        {"SalesAmount", "Sales Amount"},
+			        {"OrderQuantity", "Order Quantity"},
+			        {"TotalProductCost", "Product Cost"},
+			        {"DiscountAmount", "Discount Amount"},
+			        {"TaxAmt", "Tax Amount"}
+			    }),
+			
+			    // 8. Final Data Types (LAST STEP ONLY)
+			    FinalTypes = Table.TransformColumnTypes(RenamedColumns, {
+			        {"Product ID", Int64.Type},
+			        {"Customer ID", Int64.Type},
+			        {"Order Date ID", Int64.Type},
+			        {"Ship Date ID", Int64.Type},
+			        {"Due Date ID", Int64.Type},
+			        {"Sales Amount", Currency.Type},
+			        {"Product Cost", Currency.Type},
+			        {"Discount Amount", Currency.Type},
+			        {"Tax Amount", Currency.Type},
+			        {"Freight", Currency.Type},
+			        {"Order Quantity", Int64.Type},
+			        {"Order Hour", Int64.Type},
+			        {"Ship Hour", Int64.Type},
+			        {"Due Hour", Int64.Type}
+			    }),
+			    #"Removed Columns" = Table.RemoveColumns(FinalTypes,{"Order Date ID", "Ship Date ID", "Due Date ID", "Ship Hour", "Due Hour"}),
+			    #"Filtered Rows" = Table.SelectRows(#"Removed Columns", each true),
+			    #"Removed Columns1" = Table.RemoveColumns(#"Filtered Rows",{"Data Quality Flag"})
+			
+			in
+			    #"Removed Columns1"
+
+	/// Foreign key linking to the Product table
+	column 'Product ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d265235d-a706-41cb-a61d-ac357521b6b2
+		summarizeBy: none
+		sourceColumn: Product ID
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = item id|sku|article number|product key
+
+	/// Foreign key linking to the Customer table
+	column 'Customer ID'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 23aa0109-ba9b-4dd8-8fc4-4cad4a64dd0f
+		summarizeBy: none
+		sourceColumn: Customer ID
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = client id|buyer id|account id|customer key
+
+	/// Total revenue for the sales transaction
+	column 'Sales Amount'
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: 94907d39-29bf-45be-b34c-48c759a3402b
+		summarizeBy: none
+		sourceColumn: Sales Amount
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = revenue|turnover|income|sales|total sales|sale value|transaction amount
+
+	/// Number of units sold in the transaction
+	column 'Order Quantity'
+		dataType: int64
+		isHidden
+		formatString: #,0
+		lineageTag: 434b1a92-1238-44fb-ae97-34f1274c55be
+		summarizeBy: none
+		sourceColumn: Order Quantity
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = quantity|units|qty|units sold|number of items|items ordered
+
+	/// Total cost of products sold in the transaction
+	column 'Product Cost'
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: a3ef2e18-761d-4d79-ab6e-c2d20c3c8401
+		summarizeBy: none
+		sourceColumn: Product Cost
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = cogs|cost of goods sold|total cost|unit cost total
+
+	/// Discount applied to the transaction
+	column 'Discount Amount'
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: 47fc003b-0f8c-4fae-b224-95487a313d4a
+		summarizeBy: none
+		sourceColumn: Discount Amount
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = discount|reduction|rebate|markdown|price reduction
+
+	/// Tax amount charged on the transaction
+	column 'Tax Amount'
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: 048edb9a-5831-4516-9d81-3eb561ff09cc
+		summarizeBy: none
+		sourceColumn: Tax Amount
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = tax|vat|gst|duty|sales tax
+
+	/// Freight or shipping cost for the transaction
+	column Freight
+		dataType: decimal
+		isHidden
+		formatString: #,0.00
+		lineageTag: 28329e8a-c03b-4fd1-9bff-62612f2b4ac2
+		summarizeBy: none
+		sourceColumn: Freight
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = shipping|delivery cost|shipping cost|postage|logistics cost
+
+	/// Date the order was placed — active relationship to the Date table
+	column 'Order Date'
+		dataType: dateTime
+		isHidden
+		formatString: dd/MM/yyyy
+		lineageTag: b1e27c07-067b-4ebf-95a6-2f4eb880ec22
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Order Date
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = purchase date|transaction date|sale date|order placed|date ordered
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Hour of day the order was placed (0–23)
+	column 'Order Hour'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 39570b17-00f7-4ad1-ae56-fe3e9b01ca7a
+		summarizeBy: none
+		sourceColumn: Order Hour
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = time of order|hour ordered|order time|purchase hour
+
+	/// Date the order was shipped — inactive relationship to the Date table
+	column 'Ship Date'
+		dataType: dateTime
+		isHidden
+		formatString: dd/MM/yyyy
+		lineageTag: 1211fef0-095f-49e7-af0c-7dc20b8e2469
+		summarizeBy: none
+		sourceColumn: Ship Date
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = dispatch date|shipping date|sent date|delivery dispatch
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Date the order is due — inactive relationship to the Date table
+	column 'Due Date'
+		dataType: dateTime
+		isHidden
+		formatString: dd/MM/yyyy
+		lineageTag: 168b74cb-31b5-4314-8176-99121cb146c3
+		summarizeBy: none
+		sourceColumn: Due Date
+
+		changedProperty = IsHidden
+
+		annotation Synonyms = delivery date|expected date|due delivery|promise date
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Order hour grouped into time-of-day periods for sales pattern analysis
+	column 'Time of Day' = SWITCH(TRUE(), Sales[Order Hour] >= 6 && Sales[Order Hour] < 12, "Morning (6–12)", Sales[Order Hour] >= 12 && Sales[Order Hour] < 17, "Afternoon (12–17)", Sales[Order Hour] >= 17 && Sales[Order Hour] < 21, "Evening (17–21)", "Night (21–6)")
+		dataType: string
+		isHidden
+		displayFolder: Groups & Bins
+		lineageTag: 99974c55-d370-41c2-a7c3-c80ad1db5c75
+
+		changedProperty = IsHidden
+
+	/// Sales amount grouped into transaction size tiers for revenue distribution analysis
+	column 'Sales Amount Tier' = SWITCH(TRUE(), Sales[Sales Amount] < 100, "Small (< 100)", Sales[Sales Amount] < 500, "Medium (100–500)", Sales[Sales Amount] < 2000, "Large (500–2K)", Sales[Sales Amount] < 5000, "X-Large (2K–5K)", "Enterprise (5K+)")
+		dataType: string
+		isHidden
+		displayFolder: Groups & Bins
+		lineageTag: 62acfbf5-f5f2-4456-ae70-7e635c7e6bfa
+
+		changedProperty = IsHidden
+
+	partition Sales = m
+		mode: import
+		source =
+				let
+				    // 1. Data Source (Dynamic parameters)
+				    Source = Sql.Database(Server, Database),
+				    FactInternetSales = Source{[Schema="dbo", Item="FactInternetSales"]}[Data],
+				
+				    // 2. Select only required columns early (CRITICAL for performance)
+				    SelectedColumns = Table.SelectColumns(FactInternetSales, {
+				        "ProductKey",
+				        "CustomerKey",
+				        "OrderDateKey",
+				        "ShipDateKey",
+				        "DueDateKey",
+				        "OrderDate",
+				        "ShipDate",
+				        "DueDate",
+				        "SalesAmount",
+				        "OrderQuantity",
+				        "TotalProductCost",
+				        "DiscountAmount",
+				        "TaxAmt",
+				        "Freight"
+				    }),
+				
+				    // INCREMENTAL REFRESH — filter on OrderDate using RangeStart/RangeEnd
+				    // Applied before any transforms to preserve query folding to SQL source
+				    FilteredByRange = Table.SelectRows(SelectedColumns, each
+				        [OrderDate] >= RangeStart and [OrderDate] < RangeEnd
+				    ),
+				
+				    // 3. Data Type Normalization (keep folding intact)
+				    RoundedNumerics = Table.TransformColumns(FilteredByRange, {
+				        {"SalesAmount", each Number.Round(_, 2), type number},
+				        {"TotalProductCost", each Number.Round(_, 2), type number},
+				        {"DiscountAmount", each Number.Round(_, 2), type number},
+				        {"TaxAmt", each Number.Round(_, 2), type number},
+				        {"Freight", each Number.Round(_, 2), type number}
+				    }),
+				
+				    // 4. Split datetime into Date + Time (hour-level granularity)
+				    AddOrderDate = Table.AddColumn(RoundedNumerics, "Order Date", each Date.From([OrderDate]), type date),
+				    AddOrderHour = Table.AddColumn(AddOrderDate, "Order Hour", each Time.Hour(Time.From([OrderDate])), Int64.Type),
+				
+				    AddShipDate = Table.AddColumn(AddOrderHour, "Ship Date", each Date.From([ShipDate]), type date),
+				    AddShipHour = Table.AddColumn(AddShipDate, "Ship Hour", each Time.Hour(Time.From([ShipDate])), Int64.Type),
+				
+				    AddDueDate = Table.AddColumn(AddShipHour, "Due Date", each Date.From([DueDate]), type date),
+				    AddDueHour = Table.AddColumn(AddDueDate, "Due Hour", each Time.Hour(Time.From([DueDate])), Int64.Type),
+				
+				    // 5. Data Quality Flags
+				    AddQualityFlag = Table.AddColumn(AddDueHour, "Data Quality Flag", each
+				        if [SalesAmount] < 0 then "Negative Sales"
+				        else if [OrderQuantity] = 0 then "Zero Quantity"
+				        else if [ProductKey] = null or [CustomerKey] = null then "Missing Keys"
+				        else "OK"
+				    ),
+				
+				    // 6. Remove original datetime columns (cardinality reduction)
+				    RemovedDateTime = Table.RemoveColumns(AddQualityFlag, {
+				        "OrderDate", "ShipDate", "DueDate"
+				    }),
+				
+				    // 7. Rename for model alignment (star schema friendly)
+				    RenamedColumns = Table.RenameColumns(RemovedDateTime, {
+				        {"ProductKey", "Product ID"},
+				        {"CustomerKey", "Customer ID"},
+				        {"OrderDateKey", "Order Date ID"},
+				        {"ShipDateKey", "Ship Date ID"},
+				        {"DueDateKey", "Due Date ID"},
+				        {"SalesAmount", "Sales Amount"},
+				        {"OrderQuantity", "Order Quantity"},
+				        {"TotalProductCost", "Product Cost"},
+				        {"DiscountAmount", "Discount Amount"},
+				        {"TaxAmt", "Tax Amount"}
+				    }),
+				
+				    // 8. Final Data Types (LAST STEP ONLY)
+				    FinalTypes = Table.TransformColumnTypes(RenamedColumns, {
+				        {"Product ID", Int64.Type},
+				        {"Customer ID", Int64.Type},
+				        {"Order Date ID", Int64.Type},
+				        {"Ship Date ID", Int64.Type},
+				        {"Due Date ID", Int64.Type},
+				        {"Sales Amount", Currency.Type},
+				        {"Product Cost", Currency.Type},
+				        {"Discount Amount", Currency.Type},
+				        {"Tax Amount", Currency.Type},
+				        {"Freight", Currency.Type},
+				        {"Order Quantity", Int64.Type},
+				        {"Order Hour", Int64.Type},
+				        {"Ship Hour", Int64.Type},
+				        {"Due Hour", Int64.Type}
+				    }),
+				    #"Removed Columns" = Table.RemoveColumns(FinalTypes,{"Order Date ID", "Ship Date ID", "Due Date ID", "Ship Hour", "Due Hour"}),
+				    #"Filtered Rows" = Table.SelectRows(#"Removed Columns", each true),
+				    #"Removed Columns1" = Table.RemoveColumns(#"Filtered Rows",{"Data Quality Flag"})
+				
+				in
+				    #"Removed Columns1"
+
+	changedProperty = IsHidden
+
+	annotation PBI_IncRefreshPolicy = {"Version":1,"RefreshPeriodType":"days","RefreshPeriods":7,"ArchivePeriodType":"years","ArchivePeriods":3,"DetectDataChanges":false,"IncrementalGranularity":"day","SourceExpression":"[Order Date]","TimeZone":"UTC"}
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

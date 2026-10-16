@@ -1,0 +1,81 @@
+/// For marketing and CRM teams. Focused on customer demographics, geography and purchasing behaviour.
+perspective 'Customer Insights'
+
+	perspectiveTable Customer
+
+		perspectiveColumn 'Full Name'
+
+		perspectiveColumn Gender
+
+		perspectiveColumn 'Marital Status'
+
+		perspectiveColumn Education
+
+		perspectiveColumn Occupation
+
+		perspectiveColumn City
+
+		perspectiveColumn Country
+
+		perspectiveColumn Age
+
+		perspectiveColumn 'Income Band'
+
+		perspectiveColumn 'Age Band'
+
+		perspectiveColumn 'Occupation Group'
+
+		perspectiveHierarchy Geography
+
+		perspectiveHierarchy Demographics
+
+	perspectiveTable Sales
+
+		perspectiveColumn 'Sales Amount'
+
+		perspectiveColumn 'Order Quantity'
+
+		perspectiveColumn 'Order Date'
+
+		perspectiveColumn 'Sales Amount Tier'
+
+	perspectiveTable Date
+
+		perspectiveColumn Date
+
+		perspectiveColumn Year
+
+		perspectiveColumn Quarter
+
+		perspectiveColumn Month
+
+		perspectiveColumn 'Year Month'
+
+		perspectiveColumn 'Half Year'
+
+		perspectiveHierarchy Calendar
+
+	perspectiveTable 'Base Measures'
+
+		perspectiveMeasure 'Total Sales Amount'
+
+		perspectiveMeasure 'Avg Sales Amount'
+
+		perspectiveMeasure 'Sales Count'
+
+		perspectiveMeasure 'Total Order Quantity'
+
+		perspectiveMeasure 'Avg Order Quantity'
+
+		perspectiveMeasure 'Revenue per Unit'
+
+		perspectiveMeasure 'Gross Profit'
+
+		perspectiveMeasure 'Gross Profit Margin %'
+
+		perspectiveMeasure 'Net Sales Amount'
+
+		perspectiveMeasure 'Total Discount Amount'
+
+		perspectiveMeasure 'Discount %'
+

@@ -1,0 +1,113 @@
+table 'Base Measures'
+	lineageTag: 87fdf7f1-4571-4376-9f0f-46f50def5d51
+
+	/// Total gross sales revenue before discounts and returns
+	measure 'Gross Sales' = SUM(Sales[SalesAmount])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: a4d7c853-992e-49f1-8d45-43cc553a3246
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Total tax amount calculated on sales
+	measure Tax = SUM(Sales[TaxAmt])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 68840cdf-31de-444d-acdd-2cb4838f3957
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Total quantity of units sold
+	measure 'Units Sold' = SUM(Sales[OrderQuantity])
+		formatString: 0
+		lineageTag: 4e381bea-dd62-4719-a52f-5300ccd96b4a
+
+	/// Total number of orders placed
+	measure Orders = COUNTROWS(Sales)
+		formatString: 0
+		lineageTag: 810c105a-3039-4077-a324-c1c5bc415639
+
+	/// Total freight and shipping costs
+	measure Freight = SUM(Sales[Freight])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 8ccfd3fe-6bf0-449b-83bc-e2fa6bcef19d
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Cost of goods sold
+	measure COGs = SUM(Sales[TotalProductCost])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 01437b87-2768-4206-9e2e-1200ea5d3f74
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	/// Profit after all costs including COGS, freight, and tax
+	measure 'Net Profit' = SUMX(Sales, ([SalesAmount] - [DiscountAmount]))
+		formatString: #,##0.00
+		lineageTag: 387380fc-67ec-4d6a-b37d-2801ac2cca8d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Formatted label for cost of goods sold
+	measure 'COGs Label' = FORMAT([COGs],"€#,0,.0#K")
+		lineageTag: 098c4af2-464b-42be-b867-78b8894463f1
+
+	/// Formatted label for gross sales
+	measure 'Gross Sales Label' = FORMAT([Gross Sales],"€#,0,.0#K")
+		lineageTag: 4c28efc7-0ac0-4db1-a5df-1033a1db008b
+
+	/// Total quantity of inventory on hand
+	measure 'Total Inventory QTY' = SUM(ProductInventory[UnitsBalance])
+		formatString: 0
+		displayFolder: Semi-Additive Measures
+		lineageTag: 546dcf3f-8e31-4bc1-91bf-3d109127ef41
+
+	/// Last date inventory stock on hand
+	measure 'Stock on Hand LD' = ```
+			CALCULATE( [Total Inventory Qty] , LASTDATE('Date'[Date]) )
+			
+			```
+		formatString: 0
+		displayFolder: Semi-Additive Measures
+		lineageTag: b6472282-fb11-4f90-8b49-b9e1f6200408
+
+	/// Stock on hand at last non-blank date
+	measure 'Stock on Hand LNB' =
+			
+			VAR LastNonBlankDate =
+			    LASTNONBLANK (
+			        'Date'[Date],
+			        CALCULATE ( [Total Inventory QTY] )
+			    )
+			VAR Result =
+			    CALCULATE (
+			        [Total Inventory QTY],
+			        'Date'[Date] = LastNonBlankDate
+			    )
+			RETURN
+			    Result
+			/*
+			Calculate ( [Total Inventory QTY] , LASTNONBLANK( 'Date'[Date], CALCULATE ( [Total Inventory QTY] )  )  )
+			*/
+		formatString: 0
+		displayFolder: Semi-Additive Measures
+		lineageTag: 75079c12-9699-4163-9105-7e784323f0f9
+
+	/// The last date with available data
+	measure 'Last Date' = LASTDATE('ProductInventory'[MovementDate])
+		formatString: yyyy-mm-dd
+		displayFolder: Semi-Additive Measures
+		lineageTag: 0fc118e4-04db-44f6-a1a0-88b4fc835b8f
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	partition 'Base Measures' = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"Column1"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_ResultType = Table
+

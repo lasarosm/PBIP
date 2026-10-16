@@ -1,0 +1,28 @@
+/// Disconnected mapping table for dynamic RLS. Maps user UPNs to their permitted region. Used by the Dynamic Region RLS role via LOOKUPVALUE() — no relationships to other tables.
+table 'RLS User Map'
+	isHidden
+	lineageTag: d29bf813-8e9b-4f71-b980-e8ab9cba7d6e
+
+	column UserUPN
+		lineageTag: fe58e6b9-5983-46d4-9bd3-d184b0b1ccd1
+		isNameInferred
+		sourceColumn: [UserUPN]
+
+	column Region
+		lineageTag: 4a402a46-8f3d-43b2-b57e-9f2f53382c99
+		isNameInferred
+		sourceColumn: [Region]
+
+	partition 'RLS User Map' = calculated
+		mode: import
+		source =
+				DATATABLE(
+				    "UserUPN", STRING,
+				    "Region", STRING,
+				    {
+				        { "april@lmcompetence.onmicrosoft.com",  "Europe" },
+				        { "wendy@lmcompetence.onmicrosoft.com",  "Australia" },
+				        { "darcy@lmcompetence.onmicrosoft.com",  "All" }
+				    }
+				)
+

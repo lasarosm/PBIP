@@ -1,0 +1,146 @@
+table Date
+	lineageTag: 600bf4b9-8513-4e8a-94c2-9b13d2a29238
+	dataCategory: Time
+
+	column Date
+		dataType: dateTime
+		isHidden
+		isKey
+		formatString: yyyy-mm-dd
+		lineageTag: 2ecae2e3-282d-4197-8c1b-ae6d342727c1
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Date
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column DayNo
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6c007600-c920-411b-934b-e2c4ba0d6763
+		summarizeBy: none
+		sourceColumn: DayNo
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column DayName
+		dataType: string
+		lineageTag: 875b1d80-d3f4-4aad-9145-6c95796a6bb1
+		summarizeBy: none
+		sourceColumn: DayName
+		sortByColumn: DayNo
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month
+		dataType: string
+		isHidden
+		lineageTag: daeea614-39b4-4fdc-bb2c-bf2a101a6fc2
+		summarizeBy: none
+		sourceColumn: Month
+		sortByColumn: MonthNo
+
+		changedProperty = SortByColumn
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthNo
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6095359c-eca2-41c3-a9ec-f17da2943784
+		summarizeBy: none
+		sourceColumn: MonthNo
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column Quarter
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: b92373cb-3698-4524-ae63-d005968a598b
+		summarizeBy: none
+		sourceColumn: Quarter
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column Year
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 34f6de10-77fb-45d3-bb02-2aaddd97ae14
+		summarizeBy: none
+		sourceColumn: Year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = User
+
+	column YearMonth
+		dataType: string
+		lineageTag: 1fbb2b81-e01e-4e79-be6a-b27af6a59d2c
+		summarizeBy: none
+		sourceColumn: YearMonth
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'Date Hierarchy'
+		lineageTag: 0c8cbdfc-1099-40a7-bfbb-931969556522
+
+		level Year
+			lineageTag: 529a415d-28bf-49ff-9518-0f57c2eb98c8
+			column: Year
+
+		level Quarter
+			lineageTag: aab1d4b8-aeae-44ee-91d8-6d40c3de5e22
+			column: Quarter
+
+		level Month
+			lineageTag: 0557a056-fe29-4dbd-aedb-3bba3cd8a74e
+			column: Month
+
+		level Date
+			lineageTag: ce09f5d0-c6aa-4e66-ac60-b610ad39ab0d
+			column: Date
+
+		changedProperty = IsHidden
+
+	partition Date = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(Server, DB),
+				     dbo_DimDate = Source{[Schema="dbo",Item="DimDate"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(dbo_DimDate,{"FullDateAlternateKey", "DayNumberOfWeek", "EnglishDayNameOfWeek", "EnglishMonthName", "MonthNumberOfYear", "CalendarQuarter", "CalendarYear"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns",{{"FullDateAlternateKey", "Date"}, {"DayNumberOfWeek", "DayNo"}, {"EnglishDayNameOfWeek", "DayName"}, {"EnglishMonthName", "Month"}, {"MonthNumberOfYear", "MonthNo"}, {"CalendarQuarter", "Quarter"}, {"CalendarYear", "Year"}}),
+				    #"Filtered Rows" = Table.SelectRows(#"Renamed Columns", each [Year] >= YearCol),
+				    #"Added Custom Column" = Table.AddColumn(#"Filtered Rows", "Custom", each Text.Combine({Date.ToText([Date], "yyyy"), "-0", Date.ToText([Date], "%M")}), type text),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Added Custom Column",{{"Custom", "YearMonth"}})
+				in
+				    #"Renamed Columns1"
+
+	changedProperty = IsHidden
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

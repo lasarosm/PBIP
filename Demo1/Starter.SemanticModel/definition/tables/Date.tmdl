@@ -1,0 +1,64 @@
+table Date
+	lineageTag: a38b6c07-64a4-423b-b0e1-999b9cb1c346
+
+	column Date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: b37fd6f3-d50b-4df8-a955-2eb8ac20e118
+		summarizeBy: none
+		sourceColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Month
+		dataType: string
+		lineageTag: a0c7667c-d60b-4795-b562-a11ca920fef1
+		summarizeBy: none
+		sourceColumn: Month
+
+		annotation SummarizationSetBy = Automatic
+
+	column MonthNumberOfYear
+		dataType: int64
+		formatString: 0
+		lineageTag: 7b830314-a450-4079-9adf-f1f49153d064
+		summarizeBy: none
+		sourceColumn: MonthNumberOfYear
+
+		annotation SummarizationSetBy = Automatic
+
+	column Year
+		dataType: int64
+		formatString: 0
+		lineageTag: 884fa0ff-19be-4e98-bf19-e1a9d77e54cd
+		summarizeBy: none
+		sourceColumn: Year
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: 26f8ce68-e628-45f8-9b4c-db5fc7ed5218
+		summarizeBy: none
+		sourceColumn: Quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Date = m
+		mode: import
+		source =
+				let
+				  Source = Sql.Database("lmc.database.windows.net", "AdventureWorksDW2024" ),
+				  #"Navigation 1" = Source{[Schema = "dbo", Item = "DimDate"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns( #"Navigation 1",{"FullDateAlternateKey", "EnglishMonthName", "MonthNumberOfYear", "CalendarYear", "FiscalQuarter"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns",{{"EnglishMonthName", "Month"}, {"FullDateAlternateKey", "Date"}, {"CalendarYear", "Year"}, {"FiscalQuarter", "Quarter"}})
+				in
+				  #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

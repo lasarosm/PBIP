@@ -1,0 +1,59 @@
+DEFINE
+	VAR __DS0FilterTable = 
+		TREATAS({4}, 'Date'[Quarter])
+
+	VAR __DS0FilterTable2 = 
+		TREATAS({2024}, 'Date'[Year])
+
+	VAR __DS0Core = 
+		SUMMARIZECOLUMNS(
+			ROLLUPADDISSUBTOTAL('Product'[Category], "IsGrandTotalRowTotal"),
+			ROLLUPADDISSUBTOTAL(ROLLUPGROUP('Date'[Month], 'Date'[MonthNo]), "IsGrandTotalColumnTotal"),
+			__DS0FilterTable,
+			__DS0FilterTable2,
+			"Stock_on_Hand_LNB", 'Base Measures'[Stock on Hand LNB]
+		)
+
+	VAR __DS0PrimaryWindowed = 
+		TOPN(
+			102,
+			SUMMARIZE(__DS0Core, 'Product'[Category], [IsGrandTotalRowTotal]),
+			[IsGrandTotalRowTotal],
+			0,
+			'Product'[Category],
+			1
+		)
+
+	VAR __DS0SecondaryBase = 
+		SUMMARIZE(__DS0Core, 'Date'[Month], 'Date'[MonthNo], [IsGrandTotalColumnTotal])
+
+	VAR __DS0Secondary = 
+		TOPN(102, __DS0SecondaryBase, [IsGrandTotalColumnTotal], 1, 'Date'[MonthNo], 1, 'Date'[Month], 1)
+
+	VAR __DS0BodyLimited = 
+		NATURALLEFTOUTERJOIN(
+			__DS0PrimaryWindowed,
+			SUBSTITUTEWITHINDEX(
+				__DS0Core,
+				"ColumnIndex",
+				__DS0Secondary,
+				[IsGrandTotalColumnTotal],
+				ASC,
+				'Date'[MonthNo],
+				ASC,
+				'Date'[Month],
+				ASC
+			)
+		)
+
+EVALUATE
+	__DS0Secondary
+
+ORDER BY
+	[IsGrandTotalColumnTotal], 'Date'[MonthNo], 'Date'[Month]
+
+EVALUATE
+	__DS0BodyLimited
+
+ORDER BY
+	[IsGrandTotalRowTotal] DESC, 'Product'[Category], [ColumnIndex]

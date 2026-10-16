@@ -1,0 +1,22 @@
+relationship AutoDetected_0ea4649c-f800-4514-8c06-7c7e05435ed7
+	fromColumn: Sales.'Customer ID'
+	toColumn: Customer.'Customer ID'
+
+relationship AutoDetected_37e778f1-3610-4830-a483-e9adc999ce4d
+	fromColumn: Sales.'Product ID'
+	toColumn: Product.'Product ID'
+
+relationship 'Sales_Order Date_Date_Date'
+	fromColumn: Sales.'Order Date'
+	toColumn: Date.Date
+
+relationship 'Sales_Ship Date_Date_Date'
+	isActive: false
+	fromColumn: Sales.'Ship Date'
+	toColumn: Date.Date
+
+relationship 'Sales_Due Date_Date_Date'
+	isActive: false
+	fromColumn: Sales.'Due Date'
+	toColumn: Date.Date
+

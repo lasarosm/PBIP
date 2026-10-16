@@ -1,0 +1,179 @@
+/// Measure group containing all explicit DAX measures for the Sales model, organised into display folders by subject area.
+table 'Base Measures'
+	lineageTag: 08844408-a2b5-4cb8-8429-8224a86fb5ba
+
+	/// Total sum of all sales amounts
+	measure 'Total Sales Amount' = SUM(Sales[Sales Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Sales Amount
+		lineageTag: 7e1a044d-12e6-41e2-9dab-7f99d17f9148
+
+	/// Average sales amount per transaction
+	measure 'Avg Sales Amount' = AVERAGE(Sales[Sales Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Sales Amount
+		lineageTag: f98811c6-38bd-43b2-8520-ac4ac7905307
+
+	/// Minimum sales amount
+	measure 'Min Sales Amount' = MIN(Sales[Sales Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Sales Amount
+		lineageTag: 5102f7cf-6b91-4d62-9c59-0ab98d519aa3
+
+	/// Maximum sales amount
+	measure 'Max Sales Amount' = MAX(Sales[Sales Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Sales Amount
+		lineageTag: d86b39b7-ae61-4d11-ac98-21952a74a22e
+
+	/// Number of sales transactions
+	measure 'Sales Count' = COUNTROWS(Sales)
+		formatString: #,0
+		displayFolder: Sales Amount
+		lineageTag: f33cbca6-11e2-44ed-912b-5503e405e86e
+
+	/// Total number of units ordered
+	measure 'Total Order Quantity' = SUM(Sales[Order Quantity])
+		formatString: #,0
+		displayFolder: Order Quantity
+		lineageTag: 7ba484eb-a1ab-4ac1-9417-ac16f3698e02
+
+	/// Average order quantity per transaction
+	measure 'Avg Order Quantity' = AVERAGE(Sales[Order Quantity])
+		formatString: #,0.00
+		displayFolder: Order Quantity
+		lineageTag: 288babc4-1ff7-451f-a837-8ec06dd31fb7
+
+	/// Minimum order quantity
+	measure 'Min Order Quantity' = MIN(Sales[Order Quantity])
+		formatString: #,0
+		displayFolder: Order Quantity
+		lineageTag: 6037e8bc-3f76-41be-b060-d9e23e2f3a2a
+
+	/// Maximum order quantity
+	measure 'Max Order Quantity' = MAX(Sales[Order Quantity])
+		formatString: #,0
+		displayFolder: Order Quantity
+		lineageTag: 25ab3cc1-17b3-40de-89af-aa90006867b6
+
+	/// Total product cost
+	measure 'Total Product Cost' = SUM(Sales[Product Cost])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Product Cost
+		lineageTag: e1ea82ad-0bd8-4daa-ac50-f0878b42a643
+
+	/// Average product cost per transaction
+	measure 'Avg Product Cost' = AVERAGE(Sales[Product Cost])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Product Cost
+		lineageTag: 434268f5-2a5a-4e67-a319-78954df78e2e
+
+	/// Minimum product cost
+	measure 'Min Product Cost' = MIN(Sales[Product Cost])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Product Cost
+		lineageTag: 797a778d-f620-4e0f-ae8c-053090f3aeba
+
+	/// Maximum product cost
+	measure 'Max Product Cost' = MAX(Sales[Product Cost])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Product Cost
+		lineageTag: 7a90df93-c131-4a19-973a-c1b5d76393b1
+
+	/// Total discount amount
+	measure 'Total Discount Amount' = SUM(Sales[Discount Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Discount Amount
+		lineageTag: e150093e-8f9e-4588-b9c2-902223b71486
+
+	/// Average discount amount per transaction
+	measure 'Avg Discount Amount' = AVERAGE(Sales[Discount Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Discount Amount
+		lineageTag: d1887bcd-2458-43ba-be96-dc3fece2e247
+
+	/// Maximum discount applied
+	measure 'Max Discount Amount' = MAX(Sales[Discount Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Discount Amount
+		lineageTag: c164d240-ce0c-44e0-b1cb-d9f0ec184dc2
+
+	/// Discount rate as a % of total sales
+	measure 'Discount %' = DIVIDE([Total Discount Amount], [Total Sales Amount])
+		formatString: 0.00%
+		displayFolder: Discount Amount
+		lineageTag: b4dafd18-5a83-49b2-92c4-9e08fb4088fd
+
+	/// Total tax amount
+	measure 'Total Tax Amount' = SUM(Sales[Tax Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Tax Amount
+		lineageTag: 55b27c37-957d-4116-b0de-d5d37fae44b3
+
+	/// Average tax amount per transaction
+	measure 'Avg Tax Amount' = AVERAGE(Sales[Tax Amount])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Tax Amount
+		lineageTag: ebdfd512-234b-476e-8b78-8c0d203038d7
+
+	/// Tax as a % of total sales
+	measure 'Tax Rate %' = DIVIDE([Total Tax Amount], [Total Sales Amount])
+		formatString: 0.00%
+		displayFolder: Tax Amount
+		lineageTag: b5512c61-1e94-421d-8226-34634acff750
+
+	/// Total freight cost
+	measure 'Total Freight' = SUM(Sales[Freight])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Freight
+		lineageTag: a8a2599e-61cc-4b7b-bf42-dfa20c5cf8e3
+
+	/// Average freight cost per transaction
+	measure 'Avg Freight' = AVERAGE(Sales[Freight])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Freight
+		lineageTag: f8756ba8-9e14-439c-b576-1196b147c8e5
+
+	/// Freight as a % of total sales
+	measure 'Freight %' = DIVIDE([Total Freight], [Total Sales Amount])
+		formatString: 0.00%
+		displayFolder: Freight
+		lineageTag: d7f8a73d-9e05-4629-8140-7a1176ccd78b
+
+	/// Gross profit: Sales minus Product Cost
+	measure 'Gross Profit' = [Total Sales Amount] - [Total Product Cost]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Profitability
+		lineageTag: 6d609696-93c1-48ff-89e7-3e22e82b21c3
+
+	/// Gross profit margin as a % of sales
+	measure 'Gross Profit Margin %' = DIVIDE([Gross Profit], [Total Sales Amount])
+		formatString: 0.00%
+		displayFolder: Profitability
+		lineageTag: 5901a756-6d25-4704-9b85-5ccfaae45f09
+
+	/// Net revenue after discounts
+	measure 'Net Sales Amount' = [Total Sales Amount] - [Total Discount Amount]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Profitability
+		lineageTag: c34aa591-bb46-453c-b4a4-d261516a48be
+
+	/// Revenue per unit sold
+	measure 'Revenue per Unit' = DIVIDE([Total Sales Amount], [Total Order Quantity])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		displayFolder: Profitability
+		lineageTag: f5d06c0b-6ba3-42ef-82ad-1fbb05d3d662
+
+	column Dummy
+		isHidden
+		lineageTag: 5d82fa9d-27c3-4e5d-bd08-ccb2816a2873
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Dummy]
+
+	partition 'Base Measures' = calculated
+		mode: import
+		source = ROW("Dummy", BLANK())
+
+	annotation Synonyms = measures|kpis|metrics|calculations|totals
+

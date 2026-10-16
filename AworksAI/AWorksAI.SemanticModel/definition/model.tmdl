@@ -1,0 +1,40 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	discourageImplicitMeasures
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+queryGroup Parameters
+
+	annotation PBI_QueryGroupOrder = 0
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["Customer","Server","Database","Product","Date","Sales","RangeStart","RangeEnd"]
+
+annotation PBI_ProTooling = ["MCP-PBIModeling","TMDLView_Desktop","DevMode"]
+
+ref table Customer
+ref table Product
+ref table Date
+ref table Sales
+ref table 'Base Measures'
+ref table 'Calc Group'
+ref table 'Date Type'
+ref table 'RLS User Map'
+ref table 'KPI Measures'
+
+ref role 'Region - North America'
+ref role 'Dynamic Region Access'
+
+ref perspective 'Sales Analysis'
+ref perspective 'Customer Insights'
+ref perspective 'Product Catalogue'
+ref perspective 'Time Intelligence'
+
+ref cultureInfo en-US
+ref cultureInfo sv-SE
+

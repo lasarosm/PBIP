@@ -1,0 +1,26 @@
+/// Dedicated table that holds all report measures.
+table 'Key Measures'
+
+	/// Total sales revenue for the current filter selection, calculated as the sum of the sales amount on all sales transactions.
+	measure Sales = SUM ( Sales[SalesAmount] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Sales
+
+	/// Total sales accumulated from the start of the calendar year up to the latest date in the current selection.
+	measure 'Sales Year to Date' = TOTALYTD ( [Sales], 'Date'[Date] )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Sales
+
+	/// Total sales for the same period one year earlier than the current selection, used as the baseline for year-over-year comparisons.
+	measure 'Sales Same Period Last Year' = CALCULATE ( [Sales], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+		formatString: \$#,0;(\$#,0);\$#,0
+		displayFolder: Sales
+
+	column Value
+		isNameInferred
+		sourceColumn: [Value]
+
+	partition 'Key Measures' = calculated
+		mode: import
+		source = { BLANK() }
+

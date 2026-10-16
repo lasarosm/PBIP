@@ -1,0 +1,211 @@
+table Customer
+	lineageTag: 50f93586-4e3a-4f8d-ab19-d5cd355321cd
+
+	column CustomerKey
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		lineageTag: 8a2a218e-2e29-4c96-9c1b-e062d44947b6
+		summarizeBy: none
+		sourceColumn: CustomerKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Customer
+		dataType: string
+		lineageTag: 7a215383-60c6-4832-85e9-f5b1e4017796
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: Customer
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column BirthDate
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		displayFolder: Demographics
+		lineageTag: 3f3b4822-7f44-4810-84a3-e860eb2a7c71
+		summarizeBy: none
+		sourceColumn: BirthDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column MaritalStatus
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: 25530a70-edc9-4cbe-b3fb-953cb405718a
+		summarizeBy: none
+		sourceColumn: MaritalStatus
+
+		annotation SummarizationSetBy = Automatic
+
+	column Gender
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: 968741c8-443b-449a-8650-7f5aa6b6eff9
+		summarizeBy: none
+		sourceColumn: Gender
+
+		annotation SummarizationSetBy = Automatic
+
+	column YearlyIncome
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		displayFolder: Demographics
+		lineageTag: 07ae7ac7-cad4-4a9b-9102-f7754f8bef15
+		summarizeBy: none
+		sourceColumn: YearlyIncome
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column Education
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: a2bb2e5a-a7b5-4283-90b3-c5391eaff023
+		summarizeBy: none
+		sourceColumn: Education
+
+		annotation SummarizationSetBy = Automatic
+
+	column Occupation
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: 19ecf71f-b08b-40e4-91f4-17984cd5d066
+		summarizeBy: none
+		sourceColumn: Occupation
+
+		annotation SummarizationSetBy = Automatic
+
+	column HouseOwnerFlag
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: 9049bcd5-b6b3-4a32-9858-9549db86d97e
+		summarizeBy: none
+		sourceColumn: HouseOwnerFlag
+
+		annotation SummarizationSetBy = Automatic
+
+	column DateFirstPurchase
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		displayFolder: Demographics
+		lineageTag: 4485594f-3be5-4335-8430-59e8915c9eaa
+		summarizeBy: none
+		sourceColumn: DateFirstPurchase
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column CommuteDistance
+		dataType: string
+		displayFolder: Demographics
+		lineageTag: 3202c5e5-42e0-4c5e-a615-84f20ad98c97
+		summarizeBy: none
+		sourceColumn: CommuteDistance
+
+		annotation SummarizationSetBy = Automatic
+
+	column City
+		dataType: string
+		isHidden
+		lineageTag: a503eb00-61ce-4ebe-bb52-5d118f3c57d3
+		dataCategory: City
+		summarizeBy: none
+		sourceColumn: City
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column State
+		dataType: string
+		isHidden
+		lineageTag: 6a4fd789-0e41-471c-b164-f72bffa72ab4
+		dataCategory: StateOrProvince
+		summarizeBy: none
+		sourceColumn: State
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		isHidden
+		lineageTag: 1cd67cfc-bcf7-46d8-acb1-df40c7063604
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Country
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column PostalCode
+		dataType: string
+		isHidden
+		lineageTag: fd2a3b59-fe64-420b-bbe2-8b7a789c5f08
+		dataCategory: PostalCode
+		summarizeBy: none
+		sourceColumn: PostalCode
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'Country Hierarchy'
+		lineageTag: e063662b-3598-49be-8bc1-3a39fb8c6aa0
+
+		level Country
+			lineageTag: fc68d265-3028-41af-95fe-edbb834dae23
+			column: Country
+
+		level State
+			lineageTag: 926b546c-bbdb-4792-a0de-f9e059db2104
+			column: State
+
+		level Town
+			lineageTag: 121076e5-adb9-45e3-86db-9620a527da76
+			column: City
+
+		level PostalCode
+			lineageTag: b2986a88-ccac-48a0-af63-3de26e9fcea7
+			column: PostalCode
+
+		level Customer
+			lineageTag: 81e22acf-aab2-4d8b-bf8c-6e31de092171
+			column: Customer
+
+	partition Customer = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(Server, DB),
+				     dbo_DimCustomer = Source{[Schema="dbo",Item="DimCustomer"]}[Data],
+				    #"Expanded DimGeography" = Table.ExpandRecordColumn(dbo_DimCustomer, "DimGeography", {"City", "StateProvinceName", "EnglishCountryRegionName", "PostalCode"}, {"City", "StateProvinceName", "EnglishCountryRegionName", "PostalCode"}),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Expanded DimGeography",{"CustomerKey", "FirstName", "LastName", "BirthDate", "MaritalStatus", "Gender", "YearlyIncome", "EnglishEducation", "EnglishOccupation", "HouseOwnerFlag", "DateFirstPurchase", "CommuteDistance", "City", "StateProvinceName", "EnglishCountryRegionName", "PostalCode"}),
+				    #"Merged Columns" = Table.CombineColumns(#"Removed Other Columns",{"FirstName", "LastName"},Combiner.CombineTextByDelimiter(" ", QuoteStyle.None),"Customer"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Merged Columns",{{"EnglishEducation", "Education"}, {"EnglishOccupation", "Occupation"}, {"StateProvinceName", "State"}, {"EnglishCountryRegionName", "Country"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,82 @@
+table ProductInventory
+	lineageTag: 2ba99815-0807-4654-90b9-21fde3ad6195
+
+	column ProductKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8c2e1d56-1346-4d44-8c66-3e7102208491
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column MovementDate
+		dataType: dateTime
+		formatString: yyyy-mm-dd
+		lineageTag: 89732ec2-5194-4bb9-8ebf-67240ca2e444
+		summarizeBy: none
+		sourceColumn: MovementDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isDateTimeCustom":true}
+
+	column UnitCost
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 87cd6120-795f-406e-be0d-14ac9a0776de
+		summarizeBy: sum
+		sourceColumn: UnitCost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column UnitsIn
+		dataType: int64
+		formatString: 0
+		lineageTag: 9d5d52ba-2a22-4c2d-8562-dd869af4fd88
+		summarizeBy: sum
+		sourceColumn: UnitsIn
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitsOut
+		dataType: int64
+		formatString: 0
+		lineageTag: b2e1e679-1b3c-40b6-9c34-8c424c873458
+		summarizeBy: sum
+		sourceColumn: UnitsOut
+
+		annotation SummarizationSetBy = Automatic
+
+	column UnitsBalance
+		dataType: int64
+		formatString: 0
+		lineageTag: fad9f653-d823-475a-811a-ce6a8f0cb9d6
+		summarizeBy: sum
+		sourceColumn: UnitsBalance
+
+		annotation SummarizationSetBy = Automatic
+
+	partition ProductInventory = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Databases("lmc.database.windows.net"),
+				    AdventureWorksDW2024 = Source{[Name="AdventureWorksDW2024"]}[Data],
+				    dbo_FactProductInventory = AdventureWorksDW2024{[Schema="dbo",Item="FactProductInventory"]}[Data],
+				    #"Filtered Rows" = Table.SelectRows(dbo_FactProductInventory, each ([UnitsOut] <> 0) and ([UnitsIn] <> 0)),
+				    #"Removed Columns" = Table.RemoveColumns(#"Filtered Rows",{"DateKey"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

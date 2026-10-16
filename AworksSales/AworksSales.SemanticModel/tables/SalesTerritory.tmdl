@@ -1,0 +1,81 @@
+table SalesTerritory
+	lineageTag: 56125eb8-c06a-4fdf-a2a6-285b7b42ea7e
+
+	column SalesTerritoryKey
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		lineageTag: 4d76190f-3a27-4455-a17c-fbfc1e330b98
+		summarizeBy: none
+		sourceColumn: SalesTerritoryKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesRegion
+		dataType: string
+		isHidden
+		lineageTag: de33f548-1c7a-4cd2-bce5-4baf59394bf8
+		summarizeBy: none
+		sourceColumn: SalesRegion
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesCountry
+		dataType: string
+		isHidden
+		lineageTag: 1dc06d49-5847-4b7e-9f9f-f06b88d31120
+		isDefaultLabel
+		summarizeBy: none
+		sourceColumn: SalesCountry
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesContinent
+		dataType: string
+		isHidden
+		lineageTag: f351477f-5cd3-4e2d-9b72-8f715334e345
+		summarizeBy: none
+		sourceColumn: SalesContinent
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy 'Territories Hierarchy'
+		lineageTag: b7765801-a25b-4a03-9849-8cfdadb1746d
+
+		level SalesContinent
+			lineageTag: c1100f4d-6d97-4583-8caf-8c93b2d6700f
+			column: SalesContinent
+
+		level SalesCountry
+			lineageTag: a725ef6d-2a3d-42fd-ba44-79b734df658a
+			column: SalesCountry
+
+		level SalesRegion
+			lineageTag: bc31c859-da4b-4540-8cc5-e25592b07242
+			column: SalesRegion
+
+	partition SalesTerritory = m
+		mode: import
+		source =
+				let
+				     Source = Sql.Database(Server, DB),
+				     dbo_DimSalesTerritory = Source{[Schema="dbo",Item="DimSalesTerritory"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(dbo_DimSalesTerritory,{"SalesTerritoryKey", "SalesTerritoryRegion", "SalesTerritoryCountry", "SalesTerritoryGroup"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns",{{"SalesTerritoryRegion", "SalesRegion"}, {"SalesTerritoryCountry", "SalesCountry"}, {"SalesTerritoryGroup", "SalesContinent"}}),
+				    #"Filtered Rows" = Table.SelectRows(#"Renamed Columns", each [SalesRegion] <> "NA")
+				in
+				    #"Filtered Rows"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

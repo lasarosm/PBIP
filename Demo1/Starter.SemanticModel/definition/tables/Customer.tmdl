@@ -1,0 +1,89 @@
+table Customer
+	lineageTag: c64ccfc6-5cfd-4a7d-b08f-400fe5f491ac
+
+	column CustomerKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 4a39a3e9-16c2-4108-a773-8156885e85de
+		summarizeBy: none
+		sourceColumn: CustomerKey
+
+		annotation SummarizationSetBy = Automatic
+
+	column Customer
+		dataType: string
+		lineageTag: 96f8e9b3-9b1f-4dba-a2b9-444b341eae63
+		summarizeBy: none
+		sourceColumn: Customer
+
+		annotation SummarizationSetBy = Automatic
+
+	column BirthDate
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: ae1f2dc3-0d96-4453-88f3-2699161c62d4
+		summarizeBy: none
+		sourceColumn: BirthDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Gender
+		dataType: string
+		lineageTag: e8c3c730-09b6-4625-9e86-7ce7c00d5eff
+		summarizeBy: none
+		sourceColumn: Gender
+
+		annotation SummarizationSetBy = Automatic
+
+	column EnglishEducation
+		dataType: string
+		lineageTag: fa08ceba-fba8-4f37-9baf-49f0b26b6335
+		summarizeBy: none
+		sourceColumn: EnglishEducation
+
+		annotation SummarizationSetBy = Automatic
+
+	column EnglishOccupation
+		dataType: string
+		lineageTag: eb00200d-d20e-47fc-8751-b3eee00d92a0
+		summarizeBy: none
+		sourceColumn: EnglishOccupation
+
+		annotation SummarizationSetBy = Automatic
+
+	column HouseOwnerFlag
+		dataType: string
+		lineageTag: 34357610-c556-42e2-872c-97eef30fa5be
+		summarizeBy: none
+		sourceColumn: HouseOwnerFlag
+
+		annotation SummarizationSetBy = Automatic
+
+	column DateFirstPurchase
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 9815953d-a8fb-451d-9a62-586c02e546e1
+		summarizeBy: none
+		sourceColumn: DateFirstPurchase
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition Customer = m
+		mode: import
+		source =
+				let
+				  Source = Sql.Database("lmc.database.windows.net", "AdventureWorksDW2024" ),
+				  #"Navigation 1" = Source{[Schema = "dbo", Item = "DimCustomer"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(#"Navigation 1",{"CustomerKey", "FirstName", "LastName", "BirthDate", "Gender", "EnglishEducation", "EnglishOccupation", "HouseOwnerFlag", "DateFirstPurchase"}),
+				    #"Merged Columns" = Table.CombineColumns(#"Removed Other Columns",{"FirstName", "LastName"},Combiner.CombineTextByDelimiter(" ", QuoteStyle.None),"Customer")
+				in
+				  #"Merged Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

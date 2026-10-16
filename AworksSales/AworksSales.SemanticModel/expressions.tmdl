@@ -1,0 +1,52 @@
+expression Server = "lmc.database.windows.net" meta [IsParameterQuery=true, List={"lmc.database.windows.net", "Athens"}, DefaultValue="lmc.database.windows.net", Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 44552681-aa38-4303-9b03-2e8d3aa29685
+	queryGroup: Parameters
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+
+expression DB = "AdventureWorksDW2024" meta [IsParameterQuery=true, List={"AdventureWorksDW2020", "AdventureWorksDW2024"}, DefaultValue="AdventureWorksDW2024", Type="Text", IsParameterQueryRequired=true]
+	lineageTag: c2ef9918-1731-42fd-adeb-4c11eda9eb7c
+	queryGroup: Parameters
+
+	annotation PBI_ResultType = Text
+
+	annotation PBI_NavigationStepName = Navigation
+
+expression RangeStart = #datetime(2023, 1, 1, 0, 0, 0) meta [IsParameterQuery=true, Type="DateTime", IsParameterQueryRequired=true]
+	lineageTag: a6d54e71-50d1-4acb-af46-0513e6d5c96e
+	queryGroup: Parameters
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = DateTime
+
+expression RangeEnd = #datetime(2025, 12, 31, 0, 0, 0) meta [IsParameterQuery=true, Type="DateTime", IsParameterQueryRequired=true]
+	lineageTag: 00fe156a-ebb2-4d78-bbb4-6762e9da8d97
+	queryGroup: Parameters
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = DateTime
+
+expression YearCol =
+		let
+		    Source = Sql.Database(Server, DB),
+		     dbo_FactInternetSales = Source{[Schema="dbo",Item="FactInternetSales"]}[Data],
+		    #"Removed Other Columns" = Table.SelectColumns(dbo_FactInternetSales,{"ProductKey", "CustomerKey", "SalesTerritoryKey", "SalesOrderNumber", "SalesOrderLineNumber", "OrderQuantity", "TotalProductCost", "SalesAmount", "TaxAmt", "Freight", "OrderDate", "DueDate", "ShipDate"}),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Removed Other Columns",{{"SalesOrderLineNumber", Int64.Type},{"OrderDate", type datetime}, {"DueDate", type date}, {"ShipDate", type date}}),
+		    #"Filtered Rows" = Table.SelectRows(#"Changed Type", each [OrderDate] >= RangeStart and [OrderDate] < RangeEnd),
+		    #"Added Custom" = Table.AddColumn(#"Filtered Rows", "YearCol", each Date.Year([OrderDate])),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Added Custom",{{"YearCol", Int64.Type}}),
+		    YearCol1 = #"Changed Type1"[YearCol],
+		    MinSalesYear = List.Min(YearCol1)
+		in
+		    MinSalesYear
+	lineageTag: 705d0ec1-6afe-4085-a4aa-764d5cbb8f72
+	queryGroup: Lists
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Number
+
