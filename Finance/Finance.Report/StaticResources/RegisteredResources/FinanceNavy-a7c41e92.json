@@ -1,0 +1,45 @@
+{
+  "name": "FinanceNavy-a7c41e92.json",
+  "dataColors": [
+    "#1F4E79",
+    "#0F766E",
+    "#B45309",
+    "#6D28D9",
+    "#0E7490",
+    "#475569",
+    "#B91C1C",
+    "#64748B"
+  ],
+  "good": "#0F766E",
+  "neutral": "#B45309",
+  "bad": "#B91C1C",
+  "maximum": "#1F4E79",
+  "center": "#DCE8F5",
+  "minimum": "#F4F6FA",
+  "null": "#64748B",
+  "foreground": "#1E293B",
+  "background": "#FFFFFF",
+  "tableAccent": "#1F4E79",
+  "textClasses": {
+    "callout": {
+      "fontSize": 28,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#0B2545"
+    },
+    "title": {
+      "fontSize": 13,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#0B2545"
+    },
+    "header": {
+      "fontSize": 12,
+      "fontFace": "Segoe UI Semibold",
+      "color": "#0B2545"
+    },
+    "label": {
+      "fontSize": 10,
+      "fontFace": "Segoe UI",
+      "color": "#1E293B"
+    }
+  }
+}
